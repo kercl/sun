@@ -28,10 +28,6 @@ class GTPattern:
     else:
       self._init_from_array(pattern)
   
-  def _inc_at_coords_(self, coords):
-    self._m_laligned[coords] += 1
-    self._m_raligned[coords[0], self._len - 1 - coords[0] + coords[1]] += 1
-
   def __eq__(self, other):
     return np.equal(self._m_laligned[np.tril_indices(self._len)], other._m_laligned[np.tril_indices(other._len)]).all()
 
@@ -55,21 +51,6 @@ class GTPattern:
     for i,r in enumerate(m):
       ret += np.diagflat(r[:i+1], len(m) - i - 1)
     return ret
-
-  def _get_inc_candidates(self):
-    lu_inc_possible = np.vstack([np.diff(self._m_laligned, axis=0), np.full(self._len,np.nan)])
-
-    d_inc_possible = np.vstack([np.diff(self._m_raligned[::-1], axis=0), np.full(self._len,np.nan)])
-    np.fill_diagonal(d_inc_possible,1)
-    d_inc_possible = GTPattern._align_to_left(d_inc_possible[::-1])
-
-    lu_inc_possible[-1,:] = 0 # top row not icrementable
-
-    lu_inc_possible = np.nan_to_num(lu_inc_possible)
-    d_inc_possible = np.nan_to_num(d_inc_possible)
-
-    coords = np.array(np.where(np.greater(lu_inc_possible, 0) & np.greater(d_inc_possible, 0))).T
-    return [(x,y) for x,y in coords]
 
   def __getitem__(self, key):
     crop = (slice(None),slice(None))
@@ -120,68 +101,30 @@ class GTPattern:
       space = "           "
     return rep[:-2] + "])"
 
+  def __len__(self):
+    return len(self._m_laligned)
+
   def sum(self, axis=None):
     r = np.nansum(self._m_laligned, axis=axis)
     if axis == 1:
       return r[::-1]
     return r
   
-  def increment(self, keep_top_row=False):
-    print(np.diff(self._m_laligned))
+  def unravel(self):
+    flattend = self._m_raligned[::-1].flatten()
+    return flattend[~np.isnan(flattend)]
 
-class GTPatternIterator:
-  MULTIPROCESSING_LIMIT = 5
-  POOLSIZE = 8
-
-  def __init__(self, start, multiprocessing=False):
-    self._base_patterns = [start]
-    self._current_pos = 0
-    self._multiprocessing = multiprocessing
+class GTBasis:
+  def __init__(self, max_value, min_value):
+    pass
   
-  def __iter__(self):
-    return self
-
   @staticmethod
-  def _digrams_for_next_weight(old_pattern):
-    inc_coords = old_pattern._get_inc_candidates()
-    pattern_batch = np.empty(len(inc_coords), dtype=object)
-    for i,c in enumerate(inc_coords):
-      pattern_batch[i] = GTPattern(old_pattern, copy=True)
-      pattern_batch[i]._inc_at_coords_(c)
-    return pattern_batch
+  def _increment_pattern_top_fixed(p):
+    for k in range(len(p) - 1): # iterate through rows
+      for l in range(k + 1):
+        print(k,l)
 
-  def __next__(self):
-    if self._current_pos < len(self._base_patterns):
-      m = self._base_patterns[self._current_pos]
-      self._current_pos += 1
-      return m
-    
-    if self._current_pos < GTPatternIterator.MULTIPROCESSING_LIMIT or not self._multiprocessing:
-      new_patterns = []
-      
-      pattern_batch = None
-      for old_pattern in self._base_patterns:
-        inc_coords = old_pattern._get_inc_candidates()
-        pattern_batch = np.empty(len(inc_coords), dtype=object)
-        for i,c in enumerate(inc_coords):
-          pattern_batch[i] = GTPattern(old_pattern, copy=True)
-          pattern_batch[i]._inc_at_coords_(c)
-        new_patterns.append(pattern_batch)
-    else:
-      with Pool(GTPatternIterator.POOLSIZE) as p:
-        new_patterns = p.map(GTPatternIterator._digrams_for_next_weight, self._base_patterns)
-    
-    self._base_patterns = []
-    for p in itertools.chain(*new_patterns):
-      exists = False
-      for q in self._base_patterns:
-        if p == q:
-          exists = True
-          break
-      if not exists:
-        self._base_patterns.append(p)
-
-    if len(self._base_patterns) == 0:
-      raise StopIteration()
-    self._current_pos = 1
-    return self._base_patterns[0]
+  
+  @classmethod
+  def from_fixed_top_row(cls, row):
+    pass
