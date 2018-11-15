@@ -28,6 +28,15 @@ class GTPattern:
     else:
       self._init_from_array(pattern)
   
+  @classmethod
+  def unflatten(self, array):
+    N = int( (-1 + np.sqrt(1 + 8*len(array))) // 2 )
+
+    if int(N*(N+1)//2) != len(array): raise ValueError("Invalid array. Cannot reshape into pattern.")
+
+    indices = np.insert(np.cumsum(np.arange(N,0,-1)), 0, 0)
+    return GTPattern([array[indices[i-1]:indices[i]] for i in range(1,N+1)])
+
   def __eq__(self, other):
     return np.equal(self._m_laligned[np.tril_indices(self._len)], other._m_laligned[np.tril_indices(other._len)]).all()
 
@@ -110,21 +119,104 @@ class GTPattern:
       return r[::-1]
     return r
   
-  def unravel(self):
+  def flatten(self):
     flattend = self._m_raligned[::-1].flatten()
     return flattend[~np.isnan(flattend)]
 
 class GTBasis:
-  def __init__(self, max_value, min_value):
-    pass
+  def __init__(self, min_pattern, max_pattern):
+    self._min_pattern = min_pattern
+    self._max_pattern = max_pattern
   
   @staticmethod
-  def _increment_pattern_top_fixed(p):
-    for k in range(len(p) - 1): # iterate through rows
-      for l in range(k + 1):
-        print(k,l)
+  def _increment_array_with_limit(array, min_array, max_array):
+    low_points = np.where(max_array > array)[0]
 
+    if len(low_points) == 0:
+      array[:] = np.copy(min_array)
+      return array, True
+    
+    array[low_points[0]] += 1
+    array[:low_points[0]] = array[low_points[0]]
+
+    return array, False
+
+  @staticmethod
+  def _min_pattern_fixed_top(top_row):
+    return GTPattern([top_row[i:] for i in range(len(top_row))])
   
+  @staticmethod
+  def _max_pattern_fixed_top(top_row):
+    return GTPattern([top_row[:len(top_row)-i] for i in range(len(top_row))])
+
+  def max(self):
+    return self._max_pattern
+  
+  def min(self):
+    return self._min_pattern
+  
+  def index_of(self, pattern):
+    N = len(self.min())
+    search_word = pattern.flatten()
+
+    lo_bound = 0
+    up_bound = len(self._pattern_map)
+
+    for i in range(N,len(search_word)):
+      lo_bound = np.searchsorted(self._pattern_map[lo_bound:up_bound,i], search_word[i]) + lo_bound
+      up_bound = np.searchsorted(self._pattern_map[lo_bound:up_bound,i], search_word[i], side="right") + lo_bound
+
+      if lo_bound + 1 == up_bound:
+        return lo_bound
+    
+    raise RuntimeError("Pattern does not exist")
+
+  def _increment_pattern_top_fixed(self, p):
+    carry = True
+    col_from_right = 1
+    while carry:
+      if col_from_right >= len(p):
+        raise RuntimeError("Maximum GTPattern reached")
+      
+      row, col = slice(col_from_right-1,len(p)-1), -col_from_right
+
+      new_col, carry = GTBasis._increment_array_with_limit(
+        p._m_raligned[row, col],
+        self.min()._m_raligned[col_from_right-1:len(p)-1,col],
+        p._m_raligned[col_from_right:,col - 1]
+      )
+      p._m_raligned[row, col] = new_col
+      if carry:
+        p._m_raligned[:,-col_from_right] = self.min()._m_raligned[:,-col_from_right]
+      p._m_laligned = GTPattern._align_to_left(p._m_raligned)
+
+      col_from_right += 1
+    
+    return p
+  
+  def __len__(self):
+    return self._number_of_patterns
+
   @classmethod
   def from_fixed_top_row(cls, row):
-    pass
+    ret = cls(
+      GTBasis._min_pattern_fixed_top(row),
+      GTBasis._max_pattern_fixed_top(row)
+    )
+
+    ret._number_of_patterns = 1
+    for k in itertools.combinations(range(len(row)),2):
+      ret._number_of_patterns *= 1 + (row[k[0]] - row[k[1]]) / (k[1] - k[0])
+      ret._number_of_patterns = int(ret._number_of_patterns)
+    
+    N = len(row)
+    ret._pattern_map = np.full((ret._number_of_patterns, N*(N+1)//2), np.nan)
+
+    p = GTPattern(ret.min(), copy=True)
+    ret._pattern_map[0,:] = p.flatten()
+    
+    for i in range(1,ret._number_of_patterns):
+      p = ret._increment_pattern_top_fixed(p)
+      ret._pattern_map[i,:] = p.flatten()
+    
+    return ret
