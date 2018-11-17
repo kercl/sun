@@ -1,6 +1,7 @@
 import itertools
 from multiprocessing import Pool
 
+import scipy.sparse as sparse
 import numpy as np
 import pandas as pd
 
@@ -169,7 +170,7 @@ class GTBasis:
       if lo_bound + 1 == up_bound:
         return lo_bound
     
-    raise RuntimeError("Pattern does not exist")
+    raise IndexError("Pattern does not exist")
 
   def _increment_pattern_top_fixed(self, p):
     carry = True
@@ -197,6 +198,10 @@ class GTBasis:
   def __len__(self):
     return self._number_of_patterns
 
+  def iterpattern(self):
+    for p in self._pattern_map:
+      yield GTPattern.unflatten(p)
+
   @classmethod
   def from_fixed_top_row(cls, row):
     ret = cls(
@@ -220,3 +225,150 @@ class GTBasis:
       ret._pattern_map[i,:] = p.flatten()
     
     return ret
+
+
+def matrix_scalar_prod(X,Y):
+  return X.dot(Y).diagonal().sum()
+
+class SUNLieAlgebraBasis:
+  def __init__(self, rep, normalize=False, multiprocessing=True):
+    self._v_basis = GTBasis.from_fixed_top_row(np.array(rep + [0]))
+    self._N = len(rep) + 1
+    
+    self._carr_sp_dim = len(self._v_basis)
+
+    self._build_center()
+
+    if multiprocessing:
+      p = Pool(8)
+      self.raising_ops = p.map(self._build_raising_op, list(range(1,self._N)))
+    else:
+      self.raising_ops = []
+      for l in range(1, self._N):
+        self.raising_ops.append(self._build_raising_op(l))
+    self._finalize_algebra()
+
+    if normalize:
+      self.onb()
+  
+  def casimir2(self):
+    ret = 0
+    for X in itertools.chain(self.center, self.center_oc):
+      ret = X.dot(X) + ret
+    return ret
+
+  def _build_center(self):
+    self.center = []
+
+    row_sums = np.array([np.sum(m[:,:], axis=1) for m in self._v_basis.iterpattern()])
+    sigma = np.append(row_sums,np.zeros((len(row_sums),1)),axis=1)
+    center = (sigma[:,1:3] - (1/2) * (sigma[:,0:2] + sigma[:,2:4])).T
+    
+    self.center.append(sparse.dia_matrix((center[0],0),shape=(len(center[0]), len(center[0]))))
+    self.center.append(sparse.dia_matrix((center[1],0),shape=(len(center[1]), len(center[1]))))
+
+  def _finalize_algebra(self):
+    Xall = [X for X in np.copy(self.raising_ops)]
+    for X,Y in itertools.combinations(self.raising_ops, 2):
+      Xall.append(X.dot(Y) - Y.dot(X))
+    
+    self.center_oc = []
+    for X in Xall:
+      self.center_oc.append(0.5 * (X + X.T))
+      self.center_oc.append(0.5j * (X - X.T))
+    
+  def make_orthogonal(self):
+    new_center = []
+    scale = np.sqrt(matrix_scalar_prod(self.center[0],self.center[0]))
+
+    for i,X in enumerate(self.center):
+      for j in range(i):
+        Y = self.center[j]
+        X = X - matrix_scalar_prod(X,Y) * Y / matrix_scalar_prod(Y, Y)
+        X = X * scale / np.sqrt(matrix_scalar_prod(X,X))
+      new_center.append(X)
+    self.center = new_center
+
+  def onb(self, scale=np.sqrt(2)):
+    # TODO: orthognalize, only normalize for now
+    for X in self.center_oc:
+      X *= scale / np.sqrt(X.dot(X).diagonal().sum())
+    
+    new_center = []
+    for i,X in enumerate(self.center):
+      for j in range(i):
+        Y = self.center[j]
+        X = X - matrix_scalar_prod(X,Y) * Y / matrix_scalar_prod(Y, Y)
+      new_center.append(X)
+    self.center = new_center
+    
+    for X in self.center:
+      X *= scale / np.sqrt(X.dot(X).diagonal().sum())
+
+  def _build_raising_op(self, l):
+    entries = np.array([])
+
+    for col,m in enumerate(self._v_basis.iterpattern()):
+      for k in range(1,l+1):
+        m_inc = GTPattern(m._m)
+        m_inc._m[len(m_inc) - l, len(m_inc) - l + k - 1] += 1
+
+        try:
+          row = self._v_basis.index_of(m_inc)
+        except IndexError:
+          continue
+
+        if row is None:
+          continue
+        
+        N1 = np.prod(m[:,l+1] - m[k,l] + k - np.arange(1,l+2))
+        N2 = np.prod(m[:,l-1] - m[k,l] + k - np.arange(1,l) - 1)
+        D = (m[:,l] - m[k,l] + k - np.arange(1,l+1)) * (m[:,l] - m[k,l] + k - np.arange(1,l+1) - 1)
+        D = np.prod(D[:k-1]) * np.prod(D[k:])
+
+        N = N1 * N2
+        if N != 0:
+          entries = np.append(entries, np.array([row,col,-N/D]))
+    entries = np.reshape(entries, (len(entries)//3, 3))
+
+    return sparse.coo_matrix((np.sqrt(entries[:,2]), (entries[:,0], entries[:,1])), shape=(self._carr_sp_dim, self._carr_sp_dim))
+
+  def _build_lowering_op(self, l):
+    entries = np.array([])
+
+    for col,m in enumerate(self._M):
+      for k in range(1,l+1):
+        m_inc = GTPattern(m._m)
+        #M_inc._m[k+l-1,l] += 1
+        m_inc._m[len(m_inc) - l, len(m_inc) - l + k - 1] -= 1
+
+        row = self._M_idx_lookup.get(hash(m_inc))
+
+        print(row, "\n", m_inc._m, hash(m_inc), "\n")
+        
+        N1 = np.prod(m[:,l+1] - m[k,l] + k - np.arange(1,l+2) + 1)
+        N2 = np.prod(m[:,l-1] - m[k,l] + k - np.arange(1,l))
+        D = (m[:,l] - m[k,l] + k - np.arange(1,l+1) + 1) * (m[:,l] - m[k,l] + k - np.arange(1,l+1))
+        D = np.prod(D[:k]) * np.prod(D[k+1:])
+
+        print(N1,N2,D)
+
+        if row is None:
+          continue
+        
+        N = N1 * N2
+        if N != 0:
+          entries = np.append(entries, np.array([row,col,N/D]))
+    entries = np.reshape(entries, (len(entries)//3, 3))
+
+    return sparse.coo_matrix((entries[:,2], (entries[:,0], entries[:,1])), shape=(self._carr_sp_dim, self._carr_sp_dim))
+    
+  def carrier_space_dim(self):
+    return self._carr_sp_dim
+  
+  def N(self):
+    return self._N
+  
+  def __len__(self):
+    return self._N ** 2 - 1
+
