@@ -6,7 +6,21 @@ import numpy as np
 import pandas as pd
 
 class GTPattern:
-  def _init_from_array(self, pattern):
+  @classmethod
+  def copy(cls, pattern):
+    ret = cls([])
+    ret._m_laligned = np.copy(pattern._m_laligned)
+    ret._m_raligned = np.copy(pattern._m_raligned)
+    ret._len = pattern._len
+    return ret
+
+  def __init__(self, pattern):
+    if len(pattern) == 0:
+      self._len = 0
+      self._m_laligned = np.array([])
+      self._m_raligned = np.array([])
+      return
+
     if np.any(np.diff(np.array([len(m) for m in pattern])) != -1): raise ValueError("Pattern has incorrect shape")
     if len(pattern) != len(pattern[0]): raise ValueError("Pattern has incorrect shape")
 
@@ -17,17 +31,6 @@ class GTPattern:
     for i,row in enumerate(reversed(pattern)):
       self._m_laligned[i,:i+1] = row
       self._m_raligned[i,-(i+1):] = row
-
-  def _duplicate_pattern(self, pattern):
-    self._m_laligned = np.copy(pattern._m_laligned)
-    self._m_raligned = np.copy(pattern._m_raligned)
-    self._len = pattern._len
-
-  def __init__(self, pattern, copy=False):
-    if copy:
-      self._duplicate_pattern(pattern)
-    else:
-      self._init_from_array(pattern)
   
   @classmethod
   def unflatten(self, array):
@@ -84,10 +87,11 @@ class GTPattern:
       self._m_laligned = GTPattern._align_to_left(self._m_raligned)
       raise IndexError("Index out of bounds.")
 
+    self._m_raligned = GTPattern._align_to_right(self._m_laligned)
     return value
   
   def astype(self, t):
-    ret = GTPattern(self, copy=True)
+    ret = GTPattern.copy(self)
     ret._m_laligned = ret._m_laligned.astype(t)
     ret._m_raligned = ret._m_raligned.astype(t)
     return ret
@@ -167,7 +171,7 @@ class GTBasis:
       lo_bound = np.searchsorted(self._pattern_map[lo_bound:up_bound,i], search_word[i]) + lo_bound
       up_bound = np.searchsorted(self._pattern_map[lo_bound:up_bound,i], search_word[i], side="right") + lo_bound
 
-      if lo_bound + 1 == up_bound:
+      if lo_bound + 1 == up_bound and GTPattern.unflatten(self._pattern_map[lo_bound]) == pattern:
         return lo_bound
     
     raise IndexError("Pattern does not exist")
@@ -201,6 +205,9 @@ class GTBasis:
   def iterpattern(self):
     for p in self._pattern_map:
       yield GTPattern.unflatten(p)
+  
+  def __getitem__(self, k):
+    return GTPattern.unflatten(self._pattern_map[k])  
 
   @classmethod
   def from_fixed_top_row(cls, row):
@@ -217,7 +224,7 @@ class GTBasis:
     N = len(row)
     ret._pattern_map = np.full((ret._number_of_patterns, N*(N+1)//2), np.nan)
 
-    p = GTPattern(ret.min(), copy=True)
+    p = GTPattern.copy(ret.min())
     ret._pattern_map[0,:] = p.flatten()
     
     for i in range(1,ret._number_of_patterns):
@@ -231,7 +238,7 @@ def matrix_scalar_prod(X,Y):
   return X.dot(Y).diagonal().sum()
 
 class SUNLieAlgebraBasis:
-  def __init__(self, rep, normalize=False, multiprocessing=True):
+  def __init__(self, rep, processes=1):
     self._v_basis = GTBasis.from_fixed_top_row(np.array(rep + [0]))
     self._N = len(rep) + 1
     
@@ -239,129 +246,83 @@ class SUNLieAlgebraBasis:
 
     self._build_center()
 
-    if multiprocessing:
-      p = Pool(8)
-      self.raising_ops = p.map(self._build_raising_op, list(range(1,self._N)))
-    else:
-      self.raising_ops = []
-      for l in range(1, self._N):
-        self.raising_ops.append(self._build_raising_op(l))
-    self._finalize_algebra()
-
-    if normalize:
-      self.onb()
-  
-  def casimir2(self):
-    ret = 0
-    for X in itertools.chain(self.center, self.center_oc):
-      ret = X.dot(X) + ret
-    return ret
+    p = Pool(processes)
+    self.raising_ops = p.map(self._build_raising_op, list(range(0,self._N-1)))
+    self._algebra_from_raising_ops()
 
   def _build_center(self):
-    self.center = []
+    self.H = []
 
-    row_sums = np.array([np.sum(m[:,:], axis=1) for m in self._v_basis.iterpattern()])
+    row_sums = np.array([m.sum(axis=1) for m in self._v_basis.iterpattern()])
+
     sigma = np.append(row_sums,np.zeros((len(row_sums),1)),axis=1)
     center = (sigma[:,1:3] - (1/2) * (sigma[:,0:2] + sigma[:,2:4])).T
-    
-    self.center.append(sparse.dia_matrix((center[0],0),shape=(len(center[0]), len(center[0]))))
-    self.center.append(sparse.dia_matrix((center[1],0),shape=(len(center[1]), len(center[1]))))
+   
+    self.H.append(sparse.dia_matrix((center[0],0),shape=(len(center[0]), len(center[0]))))
+    self.H.append(sparse.dia_matrix((center[1],0),shape=(len(center[1]), len(center[1]))))
 
-  def _finalize_algebra(self):
-    Xall = [X for X in np.copy(self.raising_ops)]
-    for X,Y in itertools.combinations(self.raising_ops, 2):
-      Xall.append(X.dot(Y) - Y.dot(X))
-    
-    self.center_oc = []
-    for X in Xall:
-      self.center_oc.append(0.5 * (X + X.T))
-      self.center_oc.append(0.5j * (X - X.T))
-    
   def make_orthogonal(self):
     new_center = []
-    scale = np.sqrt(matrix_scalar_prod(self.center[0],self.center[0]))
+    scale = np.sqrt(matrix_scalar_prod(self.H[0],self.H[0]))
 
-    for i,X in enumerate(self.center):
+    for i,X in enumerate(self.H):
       for j in range(i):
-        Y = self.center[j]
+        Y = self.H[j]
         X = X - matrix_scalar_prod(X,Y) * Y / matrix_scalar_prod(Y, Y)
         X = X * scale / np.sqrt(matrix_scalar_prod(X,X))
       new_center.append(X)
-    self.center = new_center
+    self.H = new_center
 
-  def onb(self, scale=np.sqrt(2)):
-    # TODO: orthognalize, only normalize for now
-    for X in self.center_oc:
-      X *= scale / np.sqrt(X.dot(X).diagonal().sum())
+  # def onb(self, scale=np.sqrt(2)):
+  #   # TODO: orthognalize, only normalize for now
+  #   for X in self.center_oc:
+  #     X *= scale / np.sqrt(X.dot(X).diagonal().sum())
     
-    new_center = []
-    for i,X in enumerate(self.center):
-      for j in range(i):
-        Y = self.center[j]
-        X = X - matrix_scalar_prod(X,Y) * Y / matrix_scalar_prod(Y, Y)
-      new_center.append(X)
-    self.center = new_center
+  #   new_center = []
+  #   for i,X in enumerate(self.center):
+  #     for j in range(i):
+  #       Y = self.center[j]
+  #       X = X - matrix_scalar_prod(X,Y) * Y / matrix_scalar_prod(Y, Y)
+  #     new_center.append(X)
+  #   self.center = new_center
     
-    for X in self.center:
-      X *= scale / np.sqrt(X.dot(X).diagonal().sum())
+  #   for X in self.center:
+  #     X *= scale / np.sqrt(X.dot(X).diagonal().sum())
+
+  def _algebra_from_raising_ops(self):
+    U_matrices = [U for U in np.copy(self.raising_ops)]
+    for U,V in itertools.combinations(self.raising_ops, 2):
+      U_matrices.append(U.dot(V) - V.dot(U))
+    
+    self.X = []
+    for U in U_matrices:
+      self.X.append(0.5 * (U + U.T))
+      self.X.append(0.5j * (U - U.T))
 
   def _build_raising_op(self, l):
     entries = np.array([])
 
     for col,m in enumerate(self._v_basis.iterpattern()):
-      for k in range(1,l+1):
-        m_inc = GTPattern(m._m)
-        m_inc._m[len(m_inc) - l, len(m_inc) - l + k - 1] += 1
+      for k in range(0,l+1):
+        m_inc = GTPattern.copy(m)
+        m_inc[l, k] += 1
 
         try:
           row = self._v_basis.index_of(m_inc)
         except IndexError:
           continue
 
-        if row is None:
-          continue
-        
-        N1 = np.prod(m[:,l+1] - m[k,l] + k - np.arange(1,l+2))
-        N2 = np.prod(m[:,l-1] - m[k,l] + k - np.arange(1,l) - 1)
-        D = (m[:,l] - m[k,l] + k - np.arange(1,l+1)) * (m[:,l] - m[k,l] + k - np.arange(1,l+1) - 1)
-        D = np.prod(D[:k-1]) * np.prod(D[k:])
+        N1 = np.prod(m[l+1,:] - m[l,k] + k + 1 - np.arange(1,l+3))
+        N2 = np.prod(m[l-1,:] - m[l,k] + k - np.arange(1,l+1))
 
+        D = (m[l,:] - m[l,k] + k + 1 - np.arange(1,l+2)) * (m[l,:] - m[l,k] + k - np.arange(1,l+2))
+        D = np.prod(D[:k]) * np.prod(D[k+1:])
         N = N1 * N2
         if N != 0:
           entries = np.append(entries, np.array([row,col,-N/D]))
     entries = np.reshape(entries, (len(entries)//3, 3))
 
-    return sparse.coo_matrix((np.sqrt(entries[:,2]), (entries[:,0], entries[:,1])), shape=(self._carr_sp_dim, self._carr_sp_dim))
-
-  def _build_lowering_op(self, l):
-    entries = np.array([])
-
-    for col,m in enumerate(self._M):
-      for k in range(1,l+1):
-        m_inc = GTPattern(m._m)
-        #M_inc._m[k+l-1,l] += 1
-        m_inc._m[len(m_inc) - l, len(m_inc) - l + k - 1] -= 1
-
-        row = self._M_idx_lookup.get(hash(m_inc))
-
-        print(row, "\n", m_inc._m, hash(m_inc), "\n")
-        
-        N1 = np.prod(m[:,l+1] - m[k,l] + k - np.arange(1,l+2) + 1)
-        N2 = np.prod(m[:,l-1] - m[k,l] + k - np.arange(1,l))
-        D = (m[:,l] - m[k,l] + k - np.arange(1,l+1) + 1) * (m[:,l] - m[k,l] + k - np.arange(1,l+1))
-        D = np.prod(D[:k]) * np.prod(D[k+1:])
-
-        print(N1,N2,D)
-
-        if row is None:
-          continue
-        
-        N = N1 * N2
-        if N != 0:
-          entries = np.append(entries, np.array([row,col,N/D]))
-    entries = np.reshape(entries, (len(entries)//3, 3))
-
-    return sparse.coo_matrix((entries[:,2], (entries[:,0], entries[:,1])), shape=(self._carr_sp_dim, self._carr_sp_dim))
+    return sparse.coo_matrix(( np.sqrt(entries[:,2]), (entries[:,0], entries[:,1])), shape=(self._carr_sp_dim, self._carr_sp_dim))
     
   def carrier_space_dim(self):
     return self._carr_sp_dim
@@ -371,4 +332,3 @@ class SUNLieAlgebraBasis:
   
   def __len__(self):
     return self._N ** 2 - 1
-
