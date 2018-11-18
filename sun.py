@@ -242,25 +242,15 @@ def matrix_scalar_prod(X,Y):
 
 class SUNLieAlgebraBasis:
   def __init__(self, rep, processes=1):
-    t0 = time.time()
-    print("Generateing GTBasis... ")
     self._v_basis = GTBasis.from_fixed_top_row(np.array(rep + [0]))
     self._N = len(rep) + 1
-    print("T=", time.time() - t0, "\nCenter...")
-    t0 = time.time()
     self._carr_sp_dim = len(self._v_basis)
-
     self._build_center()
-    print("T=", time.time() - t0, "\nRaising ops...")
-    t0 = time.time()
-
+    
     with Pool(processes) as p:
       self.raising_ops = p.map(self._build_raising_op, list(range(0,self._N-1)))
     
-    print("T=", time.time() - t0, "\nAlgebra...")
-    t0 = time.time()
     self._algebra_from_raising_ops()
-    print("T=", time.time() - t0)
 
   def _build_center(self):
     self.H = []
@@ -284,24 +274,6 @@ class SUNLieAlgebraBasis:
         X = X * scale / np.sqrt(matrix_scalar_prod(X,X))
       new_center.append(X)
     self.H = new_center
-
-
-
-  # def onb(self, scale=np.sqrt(2)):
-  #   # TODO: orthognalize, only normalize for now
-  #   for X in self.center_oc:
-  #     X *= scale / np.sqrt(X.dot(X).diagonal().sum())
-    
-  #   new_center = []
-  #   for i,X in enumerate(self.center):
-  #     for j in range(i):
-  #       Y = self.center[j]
-  #       X = X - matrix_scalar_prod(X,Y) * Y / matrix_scalar_prod(Y, Y)
-  #     new_center.append(X)
-  #   self.center = new_center
-    
-  #   for X in self.center:
-  #     X *= scale / np.sqrt(X.dot(X).diagonal().sum())
 
   def _algebra_from_raising_ops(self):
     U_matrices = [U for U in np.copy(self.raising_ops)]
