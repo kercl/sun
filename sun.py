@@ -295,8 +295,9 @@ class SUNLieAlgebraBasis:
 
     for col,m_flattened in enumerate(self._v_basis._pattern_map):
       for k in range(0,l+1):
+        m_flattened = np.copy(m_flattened)
         inc_idx = int(-(l+1)*(l+2)//2)+k
-
+        
         m_flattened[inc_idx] += 1
         try:
           row = self._v_basis.index_of_flattened(m_flattened)
@@ -304,9 +305,9 @@ class SUNLieAlgebraBasis:
         except IndexError:
           m_flattened[inc_idx] -= 1
           continue
-
+        
         m = GTPattern.unflatten(m_flattened)
-
+        
         N1 = np.prod(m[l+1,:] - m[l,k] + k + 1 - np.arange(1,l+3))
         if N1 == 0:
           continue
