@@ -1,8 +1,5 @@
 (* ::Package:: *)
 
-Needs["Combinatorica`"]
-
-
 GTPatternToRAlignedMatrix[pattern_]:=Module[{
 	matrix = ConstantArray[0,{Length[pattern], Length[pattern]}]
 },
@@ -88,58 +85,135 @@ GTPatternBasisFromFixedTopRow[toprow_]:=Module[{
 ]
 
 
-BinaryRangeSearch[l_,k_]:=Module[{
-	pos = BinarySearch[l, k],
-	min = None,
-	max = None
+bsearchMax[list_List, elem_]:=Module[{
+	n0 = 1, n1 = Length[list],
+	m
 },
-	If[\[Not](pos \[Element] Integers),Return[{}]];
-	min = pos;
-	max = pos;
-	
-	For[max=pos,max <= Length[l], max++,
-			If[l[[max]] != k, Break[]]
-		];
-	For[min=pos,min >= 1, min--,
-			If[l[[min]] != k, Break[]]
-		];
-	{min+1,max-1}
+	While[n0 <= n1,
+		m = Floor[(n0 + n1)/2];
+		If[list[[m]] == elem, 
+			While[list[[m]] == elem, m++]; 
+			Return[m - 1]];
+		If[list[[m]] < elem, n0 = m + 1, n1 = m - 1]
+	];
+	If[list[[m]] < elem, m, m - 1] 
+];
+
+
+bsearchMin[list_List, elem_]:=Module[{
+	n0 = 1, n1 = Length[list], 
+	m
+},
+	While[n0 <= n1,
+		m = Floor[(n0 + n1)/2];
+		If[list[[m]] == elem, 
+			While[list[[m]] == elem, m--]; 
+			Return[m + 1]];
+		If[list[[m]] < elem, n0 = m + 1, n1 = m - 1]
+	];
+	If[list[[m]] > elem, m, If[m==Length[list],None,m + 1]]
 ]
 
 
-GTPatternIndexOf[basis_,pattern_]:=Module[{
+bsearchRange[list_List, elem_]:=Module[{
+	idxmin = bsearchMin[list, elem],
+	idxmax = bsearchMax[list, elem]
+},
+	If[idxmin > Length[list] || idxmax > Length[list], Return[{}]];
+	If[list[[idxmin]] != elem, Return[{}]];
+	{idxmin, idxmax}
+]
+
+
+GTPatternIndexOfBsearch[basis_,pattern_]:=Module[{
 	candidates = {1,Length[basis]},
 	aFlattened = Flatten[pattern]
 },
 	If[\[Not](basis[[1,;;Length[pattern] ]] == pattern[[1]]), Return[None] ];
 	For[i=Length[pattern]+1, i<=(Length[pattern](Length[pattern]+1))/2,i++,
-		candidates = BinaryRangeSearch[ basis[[candidates[[1]];;candidates[[2]], i]], aFlattened[[i]] ] + candidates[[1]] - 1;
+		candidates = bsearchRange[ basis[[candidates[[1]];;candidates[[2]], i]], aFlattened[[i]] ] + candidates[[1]] - 1;
 		If[Length[candidates] == 0, Return[None]];
+Print[candidates];
 	];
 	If[candidates[[1]] == candidates[[2]], Return[candidates[[2]]], Return[None]];
 ]
 
 
-BuildSUNRaisingOp[basis_]:=Module[{
-
-},
-	None
+GTPatternIndexOf[basis_,pattern_]:=Module[{},
+	GTPatternIndexOfFlattened[basis, Flatten[pattern]]
 ]
 
 
-BuildSUNAlgebra[rep_]:=Module[{
+GTPatternIndexOfFlattened[basis_,pattern_]:=Module[{
+	ret
+},
+	ret = Position[basis, pattern]//Flatten;
+	If[Length[ret]==1, First[ret], None]
+]
+
+
+BuildSUNRaisingOp[basis_, l_]:=Module[{
+	entries = {}, col, row, k, m, incIdx,
+	N1,N2,D0
+},
+	For[col=1, col<=Length[basis], col++,
+		For[k=1, k<=l, k++,
+			m = basis[[col]];
+			incIdx = IntegerPart[-l(l+1)/2] + k - 1;
+			m[[incIdx]]++;
+			row = GTPatternIndexOfFlattened[basis, m];
+			If[row == None, Continue[]];
+			m[[incIdx]]--;
+			m = GTPatternRecoverFlattened[m]//GTPatternToLAlignedMatrix//Reverse;
+			
+			N1 = Times@@(m[[l+1,;;l+1]] - m[[l,k]] + k - Range[l+1]);
+			N2 = If[l==1,1,Times@@(m[[l-1,;;l-1]] - m[[l,k]] + k - 1 - Range[l-1])];
+			D0 = (m[[l,;;l]] - m[[l,k]] + k - Range[l])(m[[l,;;l]] - m[[l,k]] + k - 1 - Range[l]);
+			D0 = (Times@@D0[[;;k-1]])(Times@@D0[[k+1;;]]);
+			AppendTo[entries,{col,row}->-((N1 N2)/D0)];
+		];
+	];
+	SparseArray[entries, {Length[basis],Length[basis]}]
+]
+
+
+BuildSUNRaisingOp[basis_, l_]:=Module[{
+	entries = {}, col, row, k, m, incIdx,
+	N1,N2,D0
+},
+	For[col=1, col<=Length[basis], col++,
+		For[k=1, k<=l, k++,
+			m = basis[[col]];
+			incIdx = IntegerPart[-l(l+1)/2] + k - 1;
+			m[[incIdx]]++;
+			row = GTPatternIndexOfFlattened[basis, m];
+			If[row == None, Continue[]];
+			m[[incIdx]]--;
+			m = GTPatternRecoverFlattened[m]//GTPatternToLAlignedMatrix//Reverse;
+			
+			N1 = Times@@(m[[l+1,;;l+1]] - m[[l,k]] + k - Range[l+1]);
+			N2 = If[l==1,1,Times@@(m[[l-1,;;l-1]] - m[[l,k]] + k - 1 - Range[l-1])];
+			D0 = (m[[l,;;l]] - m[[l,k]] + k - Range[l])(m[[l,;;l]] - m[[l,k]] + k - 1 - Range[l]);
+			D0 = (Times@@D0[[;;k-1]])(Times@@D0[[k+1;;]]);
+			AppendTo[entries,{col,row}->Sqrt[-((N1 N2)/D0)]//Simplify];
+		];
+	];
+	SparseArray[entries, {Length[basis],Length[basis]}]
+]
+
+
+SUNLieAlgebraIrep[rep_]:=Module[{
 	carrierSpaceBasis = GTPatternBasisFromFixedTopRow[Append[rep,0]],
-	N = 0,
-	X = {},
-	H = {},
-	\[Sigma] = {},
-	diagonals = {}
+	N, X, H, \[Sigma], i, diagonals, UMatrices
 },
 	N = Length[rep]+1;
 	\[Sigma] = Append[#,0]&/@(Total[#,{2}]&/@GTPatternRecoverFlattened/@carrierSpaceBasis);
 	diagonals = \[Sigma][[;;,2;;N]] - (1/2) * (\[Sigma][[;;,1;;N-1]] + \[Sigma][[;;,3;;N+1]]) // Transpose;
 	H = (SparseArray[
-		Table[{i,i}->#[[i]],{i,1,Length[carrierSpaceBasis]}],
+		Table[{i,i}->-#[[i]],{i,1,Length[carrierSpaceBasis]}],
 		{Length[carrierSpaceBasis],Length[carrierSpaceBasis]}]&)/@diagonals;
-	H
+	UMatrices = Table[BuildSUNRaisingOp[carrierSpaceBasis, l], {l,N-1}];
+	UMatrices = Join[UMatrices, #2.#1-#1.#2&@@#&/@Subsets[UMatrices,{2}] ];
+	X = Join[1/2 (#+Transpose[#])&/@UMatrices, 1/(2I) (#-Transpose[#])&/@UMatrices];
+	Join[X,H]
 ]
