@@ -5,35 +5,16 @@
 #ifndef GT_H
 #define GT_H
 
-/* Increments the first entry i0 of arr
- * for that arr[i0] < upper_lim[i0]
- * enforcing the constraints:
- * lower_lim <= arr <= upper_lim
- * and arr[i-1] <= arr[i]
- * 
- * arguments:
- *   arr       -- lower_lim <= arr <= upper_lim
- *   length    -- lenght of the arrays
- *   lower_lim -- lower boundary for arr
- *   upper_lim -- upper boundary for arr
- * 
- * returns:
- *   0 -- if the initial array fulfils
- *        arr < upper_lim
- *   1 -- if initial array fulfils
- *        arr = upper_lim
+/*
+ * Simplification of r*n+((r-1)*r)/2+c-r
  */
-int _array_increment_by_limits(int *arr, size_t length, int *lower_lim, int *upper_lim);
+#define GT_RL_IDX(r,c,n) ((((c) << 1) + (((n) << 1) - (r) - 1) * (r)) >> 1)
+#define GT_ROW_OFFSET(r,n) ((r) * (n) - ((((r) - 1) * (r)) >> 1))
 
-/* Increments a Gelfant-Tsetlin pattern
- * arguments:
- *   length -- Length of top row
- * 
- * returns:
- *   1 -- if pattern was incremented
- *   0 -- if pattern is maximal
+/*
+ * TODO: documentation
  */
-int _gt_increment(int *pattern, int *min_pattern, size_t length);
+void gt_transpose(int *pattern, size_t length);
 
 /* For a given top row, allocate a 
  * new pattern and fill it with the unique
@@ -60,6 +41,21 @@ int _gt_increment(int *pattern, int *min_pattern, size_t length);
  * returns:
  *   pointer to pattern array
  */
-int* gt_min_int_pattern(int *toprow, size_t length);
+int* gt_allocate_min_int_pattern(int *toprow, size_t length);
+
+/* Generate all possible GT patterns for
+ * a given top-row.
+ */
+int* gt_patterns_generate(int *toprow, size_t length);
+
+/* Generate all possible GT patterns for
+ * a given top row in transposed form
+ */
+void gt_generate_all_transposed(int **pattern, int *num_entries, int *toprow, size_t length);
+
+/* Calculate number of all possible patterns
+ * for a given top row.
+ */
+size_t gt_num_of_patterns(int *toprow, size_t length);
 
 #endif
