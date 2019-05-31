@@ -3,6 +3,7 @@
 #include <stdio.h> // TODO: dbg
 
 #include "int_gt.h"
+#include "sort.h"
 
 /* Increments the first entry i0 of arr
  * for that arr[i0] < upper_lim[i0]
@@ -38,7 +39,7 @@ int _array_increment_by_limits(int *arr, size_t length, int *lower_lim, int *upp
 }
 
 void gt_min_int_pattern(int *pattern, int *toprow, size_t length) {
-    int n = length * (length + 1) >> 1,
+    int n = (length * (length + 1)) >> 1,
         offset = 0;
 
     for(int i = 0, j = 0; i < n; ++i, ++j) {
@@ -52,7 +53,7 @@ void gt_min_int_pattern(int *pattern, int *toprow, size_t length) {
 }
 
 void gt_min_int_pattern_transposed(int *pattern, int *toprow, size_t length) {
-    int n = length * (length + 1) >> 1;
+    int n = (length * (length + 1)) >> 1;
 
     int offset = 0;
     for(int i = 0; i < length; ++i) {
@@ -63,7 +64,7 @@ void gt_min_int_pattern_transposed(int *pattern, int *toprow, size_t length) {
 }
 
 int* gt_allocate_min_int_pattern(int *toprow, size_t length) {
-    int n = length * (length + 1) >> 1;
+    int n = (length * (length + 1)) >> 1;
     int *pattern = malloc(n * sizeof(int));
 
     gt_min_int_pattern(pattern, toprow, length);
@@ -71,8 +72,9 @@ int* gt_allocate_min_int_pattern(int *toprow, size_t length) {
     return pattern;
 }
 
-void gt_transpose(int *pattern, size_t length) {
-    size_t m = length - 1, idx_a, idx_b;
+void gt_multi_transpose(int *patterns, int num_patterns, size_t length) {
+    size_t m = length - 1, idx_a, idx_b,
+           n = (length * (length + 1)) >> 1;
     int offset = 0, tmp;
 
     for(int i = 0; i < (length >> 1); ++i) {
@@ -80,11 +82,17 @@ void gt_transpose(int *pattern, size_t length) {
             idx_a = GT_RL_IDX(  i,   j, length);
             idx_b = GT_RL_IDX(m-j, m-i, length);
 
-            tmp = pattern[idx_a];
-            pattern[idx_a] = pattern[idx_b];
-            pattern[idx_b] = tmp;
+            for(int k = 0; k < num_patterns * n; k += n) {
+                tmp = patterns[k + idx_a];
+                patterns[k + idx_a] = patterns[k + idx_b];
+                patterns[k + idx_b] = tmp;
+            }
         }
     }
+}
+
+void gt_transpose(int *pattern, size_t length) {
+    gt_multi_transpose(pattern, 1, length);
 }
 
 /* Increments a transposed Gelfant-Tsetlin pattern
@@ -156,7 +164,7 @@ size_t gt_num_of_patterns(int *toprow, size_t length) {
 
 void gt_generate_all_transposed(int **patterns, int *num_patterns, int *toprow, size_t length) {
     size_t n_patterns = gt_num_of_patterns(toprow, length),
-           n_entries = length * (length + 1) >> 1;
+           n_entries = (length * (length + 1)) >> 1;
     int *_patterns = malloc(sizeof(int) * n_entries * n_patterns);
 
     gt_min_int_pattern_transposed(_patterns, toprow, length);
@@ -170,4 +178,17 @@ void gt_generate_all_transposed(int **patterns, int *num_patterns, int *toprow, 
 
     *patterns = _patterns;
     *num_patterns = n_patterns;
+}
+
+void gt_generate_all(int **patterns, int *num_patterns, int *toprow, size_t length) {
+    gt_generate_all_transposed(patterns, num_patterns, toprow, length);
+    gt_multi_transpose(*patterns, *num_patterns, length);
+}
+
+void gt_sort_patterns(int *patterns, size_t n_patterns, size_t length) {
+    sort_pattern(patterns, n_patterns, length);
+}
+
+size_t gt_index_of(int *patterns, size_t n_patterns, size_t length, size_t idx) {
+
 }

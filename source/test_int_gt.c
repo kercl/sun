@@ -19,6 +19,12 @@ void print_pattern_raligned(int *pattern, size_t length) {
     }
 }
 
+void print_pattern_flattened(int *pattern, size_t length) {
+    for(int i = 0; i < (length*(length + 1)) >> 1; ++i) {
+        printf("%2d ", pattern[i]);
+    }
+}
+
 void test__array_increment_by_limits() {
     int test_data[48][5] = {
      {4,4,1,1,0}, {2,2,2,1,0}, {3,2,2,1,0}, {4,2,2,1,0}, {3,3,2,1,0}, {4,3,2,1,0},
@@ -90,16 +96,50 @@ void test_gt_transpose() {
 }
 
 void test_gt_generate_all_transposed() {
-    int toprow[] = {300,0,0}, length = 3;
+    int toprow[] = {3,2,1,0}, length = 4;
     
     int *patterns,
          n_entries;
 
-    gt_generate_all_transposed(&patterns, &n_entries, toprow, length);
+    gt_generate_all(&patterns, &n_entries, toprow, length);
+    gt_sort_patterns(patterns, n_entries, length);
+
     printf("%d\n", n_entries);
-    // int m = length * (length + 1) >> 1;
-    // for(int i = 0; i < n_entries; ++i)
-    //     print_pattern_raligned(patterns + m * i, length);
+    int m = length * (length + 1) >> 1;
+    for(int i = 0; i < n_entries; ++i) {
+        //print_pattern_raligned(patterns + m * i, length);
+        int feature = 0;
+        if(i >= 1)
+            feature = memcmp(patterns + m * i,
+                             patterns + m * (i - 1), sizeof(int) * m);
+        else
+            feature = 0;
+
+        print_pattern_flattened(patterns + m * i, length);
+        printf(": FEATURE=%d\n", feature);
+    }
+}
+
+void test_sort() {
+    int patterns[] = {
+        5,3,1,
+        5,1,3,
+        5,2,1,
+        3,6,1,
+        2,3,1,
+        6,4,1,
+        1,1,1
+    };
+    int length = 2;
+    int n_patterns = 7;
+    int m = (length * (length + 1)) >> 1;
+
+    gt_sort_patterns(patterns, n_patterns, length);
+
+    for(int i = 0; i < n_patterns; ++i) {
+        print_pattern_flattened(patterns + m * i, length);
+        printf("\n");
+    }
 }
 
 int main(int argc, char **argv) {
@@ -129,4 +169,5 @@ int main(int argc, char **argv) {
     printf("dim(V)=%ld\n", dim);*/
     printf("dim(V) = %ld\n", gt_num_of_patterns(toprow, length));
     test_gt_generate_all_transposed();
+    //test_sort();
 }

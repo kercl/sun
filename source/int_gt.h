@@ -5,6 +5,8 @@
 #ifndef GT_H
 #define GT_H
 
+#include <stddef.h>
+
 /*
  * Simplification of r*n+((r-1)*r)/2+c-r
  */
@@ -53,9 +55,24 @@ int* gt_patterns_generate(int *toprow, size_t length);
  */
 void gt_generate_all_transposed(int **pattern, int *num_entries, int *toprow, size_t length);
 
+/* Generate all possible GT patterns for
+ * a given top row in transposed form
+ */
+void gt_generate_all(int **pattern, int *num_entries, int *toprow, size_t length);
+
 /* Calculate number of all possible patterns
  * for a given top row.
  */
 size_t gt_num_of_patterns(int *toprow, size_t length);
+
+/* Sort patterns lexicographically for quick
+ * lookups.
+ */
+void gt_sort_patterns(int *patterns, size_t num_entries, size_t length);
+
+/*
+ *
+ */
+size_t gt_index_of(int *patterns, size_t num_entries, size_t length, size_t idx);
 
 #endif
