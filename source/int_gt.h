@@ -53,12 +53,12 @@ int* gt_patterns_generate(int *toprow, size_t length);
 /* Generate all possible GT patterns for
  * a given top row in transposed form
  */
-void gt_generate_all_transposed(int **pattern, int *num_entries, int *toprow, size_t length);
+void gt_generate_all_transposed(int **pattern, size_t *num_entries, int *toprow, size_t length);
 
 /* Generate all possible GT patterns for
  * a given top row in transposed form
  */
-void gt_generate_all(int **pattern, int *num_entries, int *toprow, size_t length);
+void gt_generate_all(int **pattern, size_t *num_entries, int *toprow, size_t length);
 
 /* Calculate number of all possible patterns
  * for a given top row.

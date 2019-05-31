@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "int_gt.h"
+#include "sort.h"
 
 int _array_increment_by_limits(int *arr, size_t length, int *lower_lim, int *upper_lim);
 int _gt_increment_transposed(int *pattern_tr, int *min_pattern_tr, size_t length);
@@ -96,28 +97,28 @@ void test_gt_transpose() {
 }
 
 void test_gt_generate_all_transposed() {
-    int toprow[] = {3,2,1,0}, length = 4;
+    int toprow[] = {3,2,1,0};
+    size_t length = 4;
     
-    int *patterns,
-         n_entries;
-
+    int *patterns;
+    size_t n_entries;
+    
+    printf("generating patterns... (%ld)\n", gt_num_of_patterns(toprow, length));
     gt_generate_all(&patterns, &n_entries, toprow, length);
-    gt_sort_patterns(patterns, n_entries, length);
-
-    printf("%d\n", n_entries);
+    printf("generating search tree...\n");
+    struct gt_tree tree;
+    gt_list_to_tree(&tree, patterns, n_entries, length);
+    
     int m = length * (length + 1) >> 1;
+    
+    printf("testing search tree...\n");
     for(int i = 0; i < n_entries; ++i) {
-        //print_pattern_raligned(patterns + m * i, length);
-        int feature = 0;
-        if(i >= 1)
-            feature = memcmp(patterns + m * i,
-                             patterns + m * (i - 1), sizeof(int) * m);
-        else
-            feature = 0;
-
-        print_pattern_flattened(patterns + m * i, length);
-        printf(": FEATURE=%d\n", feature);
+        assert(i == gt_locate_in_tree(&tree, patterns + i * m));
     }
+
+    printf("number of patterns %ld\n", n_entries);
+
+    gt_free_tree(&tree);
 }
 
 void test_sort() {
@@ -149,25 +150,7 @@ int main(int argc, char **argv) {
 
     int toprow[] = {2,1,0};
     int length = 3;
-    /*int *pattern = gt_allocate_min_int_pattern(toprow, length);
-    int *min_pattern = gt_allocate_min_int_pattern(toprow, length);
-    
-    gt_transpose(min_pattern, length);
-    gt_transpose(pattern, length);
 
-    print_pattern_raligned(pattern, length);
-    printf("---\n");
-    size_t dim = 1;
-    for(;;) {
-        int inc = _gt_increment_transposed(pattern, min_pattern, length);
-        if(inc == 0)
-            break;
-        dim++;
-    }
-    print_pattern_raligned(pattern, length);
-
-    printf("dim(V)=%ld\n", dim);*/
     printf("dim(V) = %ld\n", gt_num_of_patterns(toprow, length));
     test_gt_generate_all_transposed();
-    //test_sort();
 }

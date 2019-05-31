@@ -1,7 +1,7 @@
 (* ::Package:: *)
 
 GTPatternToRAlignedMatrix[pattern_]:=Module[{
-	matrix = ConstantArray[0,{Length[pattern], Length[pattern]}]
+	matrix = ConstantArray[0,{Length[pattern], Length[pattern]}],i
 },
 	For[i=1, i<=Length[pattern], i++,
 		matrix[[i,i;;]] = pattern[[i]]
@@ -11,7 +11,7 @@ GTPatternToRAlignedMatrix[pattern_]:=Module[{
 
 
 GTPatternToLAlignedMatrix[pattern_]:=Module[{
-	matrix = ConstantArray[0,{Length[pattern], Length[pattern]}]
+	matrix = ConstantArray[0,{Length[pattern], Length[pattern]}], i
 },
 	For[i=1, i<=Length[pattern], i++,
 		matrix[[i,;;Length[pattern]-i+1]] = pattern[[i]]
@@ -127,7 +127,7 @@ bsearchRange[list_List, elem_]:=Module[{
 
 GTPatternIndexOfBsearch[basis_,pattern_]:=Module[{
 	candidates = {1,Length[basis]},
-	aFlattened = Flatten[pattern]
+	aFlattened = Flatten[pattern], i
 },
 	If[\[Not](basis[[1,;;Length[pattern] ]] == pattern[[1]]), Return[None] ];
 	For[i=Length[pattern]+1, i<=(Length[pattern](Length[pattern]+1))/2,i++,
@@ -207,13 +207,32 @@ SUNLieAlgebraIrep[rep_]:=Module[{
 	N, X, H, \[Sigma], i, diagonals, UMatrices
 },
 	N = Length[rep]+1;
+	If[rep==ConstantArray[0,N-1],Return@ConstantArray[{{0}},N^2-1]];
 	\[Sigma] = Append[#,0]&/@(Total[#,{2}]&/@GTPatternRecoverFlattened/@carrierSpaceBasis);
 	diagonals = \[Sigma][[;;,2;;N]] - (1/2) * (\[Sigma][[;;,1;;N-1]] + \[Sigma][[;;,3;;N+1]]) // Transpose;
 	H = (SparseArray[
 		Table[{i,i}->-#[[i]],{i,1,Length[carrierSpaceBasis]}],
 		{Length[carrierSpaceBasis],Length[carrierSpaceBasis]}]&)/@diagonals;
+	(*H = If[normalize \[NotEqual] None, Orthogonalize[Normal/@H,normalize]//Simplify, None];*)
+	(*H = SparseArray/@(Orthogonalize[Normal/@H, 2 Tr[#1.#2]&]//Simplify);*)
 	UMatrices = Table[BuildSUNRaisingOp[carrierSpaceBasis, l], {l,N-1}];
 	UMatrices = Join[UMatrices, #2.#1-#1.#2&@@#&/@Subsets[UMatrices,{2}] ];
 	X = Join[1/2 (#+Transpose[#])&/@UMatrices, 1/(2I) (#-Transpose[#])&/@UMatrices];
 	Join[X,H]
 ]
+
+
+StandardIrrepNotation[n_]:=Reverse@Accumulate@Reverse@n
+
+
+SU3[p_,q_]:=Module[{
+	X=(SUNLieAlgebraIrep@StandardIrrepNotation@{p,q})[[{2,5,7,3,6,1,4,8}]]
+},
+	If[p!=0||q!=0,
+		X[[8]]=(Sqrt[Tr[X[[3]].X[[3]]]/Tr[#.#]]#)&@(X[[8]]-Tr[X[[3]].X[[8]]]/Tr[X[[8]].X[[8]]] X[[3]])
+	];
+	Association[Table[i->X[[i]],{i,Length[X]}]]
+]
+
+
+SU2[p_]:=SUNLieAlgebraIrep@{p}

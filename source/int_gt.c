@@ -39,10 +39,10 @@ int _array_increment_by_limits(int *arr, size_t length, int *lower_lim, int *upp
 }
 
 void gt_min_int_pattern(int *pattern, int *toprow, size_t length) {
-    int n = (length * (length + 1)) >> 1,
-        offset = 0;
+    size_t n = (length * (length + 1)) >> 1,
+           offset = 0;
 
-    for(int i = 0, j = 0; i < n; ++i, ++j) {
+    for(size_t i = 0, j = 0; i < n; ++i, ++j) {
         pattern[i] = toprow[offset + j];
 
         if(j == length - offset - 1) {
@@ -55,10 +55,11 @@ void gt_min_int_pattern(int *pattern, int *toprow, size_t length) {
 void gt_min_int_pattern_transposed(int *pattern, int *toprow, size_t length) {
     int n = (length * (length + 1)) >> 1;
 
-    int offset = 0;
-    for(int i = 0; i < length; ++i) {
-        for(int j = 0; j < length - i; ++j)
+    size_t offset = 0;
+    for(size_t i = 0; i < length; ++i) {
+        for(size_t j = 0; j < length - i; ++j) {
             pattern[offset + j] = toprow[length - i - 1];
+        }
         offset += length - i;
     }
 }
@@ -75,7 +76,7 @@ int* gt_allocate_min_int_pattern(int *toprow, size_t length) {
 void gt_multi_transpose(int *patterns, int num_patterns, size_t length) {
     size_t m = length - 1, idx_a, idx_b,
            n = (length * (length + 1)) >> 1;
-    int offset = 0, tmp;
+    int tmp;
 
     for(int i = 0; i < (length >> 1); ++i) {
         for(int j = i; j < length - i; ++j) {
@@ -162,7 +163,7 @@ size_t gt_num_of_patterns(int *toprow, size_t length) {
     return num;
 }
 
-void gt_generate_all_transposed(int **patterns, int *num_patterns, int *toprow, size_t length) {
+void gt_generate_all_transposed(int **patterns, size_t *num_patterns, int *toprow, size_t length) {
     size_t n_patterns = gt_num_of_patterns(toprow, length),
            n_entries = (length * (length + 1)) >> 1;
     int *_patterns = malloc(sizeof(int) * n_entries * n_patterns);
@@ -180,15 +181,11 @@ void gt_generate_all_transposed(int **patterns, int *num_patterns, int *toprow, 
     *num_patterns = n_patterns;
 }
 
-void gt_generate_all(int **patterns, int *num_patterns, int *toprow, size_t length) {
+void gt_generate_all(int **patterns, size_t *num_patterns, int *toprow, size_t length) {
     gt_generate_all_transposed(patterns, num_patterns, toprow, length);
     gt_multi_transpose(*patterns, *num_patterns, length);
 }
 
 void gt_sort_patterns(int *patterns, size_t n_patterns, size_t length) {
     sort_pattern(patterns, n_patterns, length);
-}
-
-size_t gt_index_of(int *patterns, size_t n_patterns, size_t length, size_t idx) {
-
 }
