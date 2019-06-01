@@ -5,6 +5,7 @@
 
 #include "int_gt.h"
 #include "sort.h"
+#include "irrep.h"
 
 int _array_increment_by_limits(int *arr, size_t length, int *lower_lim, int *upper_lim);
 int _gt_increment_transposed(int *pattern_tr, int *min_pattern_tr, size_t length);
@@ -144,13 +145,36 @@ void test_sort() {
 }
 
 int main(int argc, char **argv) {
-    test__array_increment_by_limits();
-    test_gt_allocate_min_int_pattern();
-    test_gt_transpose();
+    //test__array_increment_by_limits();
+    //test_gt_allocate_min_int_pattern();
+    //test_gt_transpose();
 
     int toprow[] = {2,1,0};
     int length = 3;
 
-    printf("dim(V) = %ld\n", gt_num_of_patterns(toprow, length));
-    test_gt_generate_all_transposed();
+    int *patterns;
+    size_t n_patterns;
+
+    gt_generate_all(&patterns, &n_patterns, toprow, length);
+    struct gt_tree tree;
+    gt_list_to_tree(&tree, patterns, n_patterns, length);
+
+    printf("%ld\n", n_patterns);
+
+    //for(int i = 0; i < n_patterns; i++)
+    //    print_pattern_raligned(patterns + i * (length * (length + 1) / 2), length);
+
+    int *num = malloc(sizeof(int) * n_patterns), 
+        *denom = malloc(sizeof(int) * n_patterns);
+    
+    gt_center_generator(&tree, 1, num, denom);
+
+    //for(int i = 0; i < n_patterns; i++) {
+    //    printf("%d/%d ", num[i], denom[i]);
+    //}
+
+    //printf("dim(V) = %ld\n", gt_num_of_patterns(toprow, length));
+    //test_gt_generate_all_transposed();
+    printf("END");
+    getchar();
 }
