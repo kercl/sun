@@ -148,9 +148,10 @@ int main(int argc, char **argv) {
     //test__array_increment_by_limits();
     //test_gt_allocate_min_int_pattern();
     //test_gt_transpose();
+    //test_gt_generate_all_transposed();
 
-    int toprow[] = {2,1,0};
-    int length = 3;
+    int toprow[] = {1,0,0};
+    int length = sizeof(toprow) / sizeof(int);
 
     int *patterns;
     size_t n_patterns;
@@ -161,20 +162,26 @@ int main(int argc, char **argv) {
 
     printf("%ld\n", n_patterns);
 
-    //for(int i = 0; i < n_patterns; i++)
-    //    print_pattern_raligned(patterns + i * (length * (length + 1) / 2), length);
+    for(int i = 0; i < n_patterns; i++)
+        print_pattern_raligned(patterns + i * (length * (length + 1) / 2), length);
 
-    int *num = malloc(sizeof(int) * n_patterns), 
-        *denom = malloc(sizeof(int) * n_patterns);
+    int *x3 = malloc(sizeof(int) * n_patterns * 2);
     
-    gt_center_generator(&tree, 1, num, denom);
+    gt_center_generator(&tree, 1, x3, x3 + n_patterns);
 
-    //for(int i = 0; i < n_patterns; i++) {
-    //    printf("%d/%d ", num[i], denom[i]);
-    //}
+    for(int i = 0; i < n_patterns; i++) {
+        printf("%d/%d ", x3[i], x3[n_patterns + i]);
+    }
+    printf("\n");
+
+    int *a = malloc(sizeof(int) * n_patterns * 2);
+
+    printf("--\n");
+    gt_lowering_operator(&tree, 1);
+    printf("--\n");
+    gt_lowering_operator(&tree, 2);
 
     //printf("dim(V) = %ld\n", gt_num_of_patterns(toprow, length));
     //test_gt_generate_all_transposed();
-    printf("END");
-    getchar();
+    printf("\n");
 }

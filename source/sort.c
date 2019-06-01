@@ -38,11 +38,26 @@ void _insert_pattern(struct gt_node *node, int *pattern, int index, int length) 
 }
 
 int gt_locate_in_tree(struct gt_tree *tree, int *pattern) {
+    size_t length = tree->length;
+
+    int *toprow = pattern; // toprow determines how many children
+    int d_limit = length - 2;
+
     struct gt_node *node = &tree->root;
 
-    for(int i = tree->length; i < (tree->length * (tree->length + 1)) >> 1; i++)
-        node = node->children + pattern[i] - pattern[tree->length - 1];
+    for(int d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
+        if(node->children == NULL || pattern[d] > pattern[i] || pattern[d] < toprow[length - 1])
+            return -1;
 
+        if(i == d_limit) {
+            i = 0;
+            d_limit--;
+        }else {
+            i++;
+        }
+
+        node = node->children + pattern[d] - toprow[length - 1];
+    }
     return node->index;
 }
 
