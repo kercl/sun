@@ -73,12 +73,15 @@ void gt_lowering_operator(struct gt_tree *patterns, int l) {
                                    (pattern_array[M + row_start + k_prime] - M_lk + k - k_prime);
                 }
                 if(k_prime < row_length - 1) {
+                    printf(" * (%d)", pattern_array[M + row_start + row_length + k_prime] - M_lk + k - k_prime);
                     numerator *= pattern_array[M + row_start + row_length + k_prime] - M_lk + k - k_prime;
                 }
-                if(l < length - 1) {
-                    numerator *= pattern_array[M + row_start - (row_length + 1) + k_prime] - M_lk + k - k_prime + 1;
-                }
+                //if(l < length - 1) {
+                printf(" * %d", pattern_array[M + row_start - (row_length + 1) + k_prime] - M_lk + k - k_prime + 1);
+                numerator *= pattern_array[M + row_start - (row_length + 1) + k_prime] - M_lk + k - k_prime + 1;
+                //}
             }
+            printf("\n");
 
             printf("Matrix element %ld,%ld --> %d / %d\n", Mj, Mi, numerator, denominator);
         }

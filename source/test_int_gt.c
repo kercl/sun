@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
     //test_gt_transpose();
     //test_gt_generate_all_transposed();
 
-    int toprow[] = {1,0,0};
+    int toprow[] = {2,0,0};
     int length = sizeof(toprow) / sizeof(int);
 
     int *patterns;
@@ -177,9 +177,9 @@ int main(int argc, char **argv) {
     int *a = malloc(sizeof(int) * n_patterns * 2);
 
     printf("--\n");
-    gt_lowering_operator(&tree, 1);
-    printf("--\n");
     gt_lowering_operator(&tree, 2);
+    printf("--\n");
+    gt_lowering_operator(&tree, 1);
 
     //printf("dim(V) = %ld\n", gt_num_of_patterns(toprow, length));
     //test_gt_generate_all_transposed();
