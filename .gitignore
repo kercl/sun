@@ -6,3 +6,5 @@ sun_old.py
 test_int_gt
 build
 test
+*.so
+*.sh
