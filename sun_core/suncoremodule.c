@@ -19,46 +19,35 @@
  * SOFTWARE.
  */
 
-#ifndef SUN_CORE_IRREP_H_
-#define SUN_CORE_IRREP_H_
+#include <python3.7m/Python.h>
 
-#include <stdint.h>
+#include "sun_core/irrep.h"
 
-#include "sun_core/int_gt.h"
+static PyObject *
+sun_core_irrep_dimension_from_dynkin(PyObject *self, PyObject *args) {
+    printf("Hello World\n");
+    return Py_None;
+}
 
-typedef int16_t mat_int_t;
+static PyMethodDef sun_core_methods[] = {
+    {"irrep_dimension_from_dynkin",
+     sun_core_irrep_dimension_from_dynkin,
+     METH_VARARGS,
+     "For a given dynkin label, return the"\
+     "dimension of the corresponding irreducible"\
+     "representation."},
 
-/* Convert dynkin label to GT top row
- */
-gt_int_t* gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length);
+    {NULL,
+     NULL,
+     0,
+     NULL}
+};
 
-/* Construct the l-th center generator
- * For GT-patterns of length n, note that
- *
- * l = 1,...,n-1
- * 
- * numerator and denominator must be arrays
- * of length tree->num_patterns. The entries
- * are the diagonal entries of the center
- * generators.
- * Note: the matrices are normed s.t. the 
- * diagonals are integer valued.
- */
-void center_generator_diag_from_gt(struct gt_tree *patterns,
-                                   int l,
-                                   mat_int_t *diagonal);
-
-/* Construct the l-th lowering operator
- * For GT-patterns of length n, note that
- *
- * l = 1,...,n-1
- * 
- * TODO: add documentation
- */
-void lowering_operator_from_gt(struct gt_tree *patterns, int l);
-
-/* Compute dimension from a given top row
- */
-size_t dimension_from_dynkin(gt_int_t *dynkin, size_t length);
-
-#endif  // SUN_CORE_IRREP_H_
+static struct PyModuleDef myModule = {
+    PyModuleDef_HEAD_INIT,
+    "sun_core",
+    "This module provides the core functionality"\
+    "for sun.",
+    -1,
+    sun_core_methods
+};

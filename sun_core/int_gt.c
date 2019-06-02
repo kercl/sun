@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "int_gt.h"
+#include "sun_core/int_gt.h"
 
 /* Increments the first entry i0 of arr
  * for that arr[i0] < upper_lim[i0]
@@ -43,8 +43,6 @@
  *   1 -- if initial array fulfils
  *        arr = upper_lim
  */
-
-
 uint8_t
 _array_increment_by_limits(gt_int_t *arr,
                            size_t length,

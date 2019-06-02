@@ -24,8 +24,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "int_gt.h"
-#include "irrep.h"
+#include "sun_core/int_gt.h"
+#include "sun_core/irrep.h"
 
 int _array_increment_by_limits(gt_int_t *arr,
                                size_t length,
@@ -138,24 +138,31 @@ void test_gt_generate_all_transposed() {
     gt_int_t *patterns;
     size_t n_entries;
 
-    printf("generating patterns... (%ld)\n",
-        gt_num_of_patterns(toprow, length));
+    assert(gt_num_of_patterns(toprow, length) == 64);
 
     gt_generate_all(&patterns, &n_entries, toprow, length);
-    printf("generating search tree...\n");
     struct gt_tree tree;
     gt_list_to_tree(&tree, patterns, n_entries, length);
 
     int m = length * (length + 1) >> 1;
 
-    printf("testing search tree...\n");
-    for (int i = 0; i < n_entries; ++i) {
+    for (int i = 0; i < n_entries; ++i)
         assert(i == gt_locate_in_tree(&tree, patterns + i * m));
-    }
-
-    printf("number of patterns %ld\n", n_entries);
+    assert(n_entries == 64);
 
     gt_free_tree(&tree);
+}
+
+void test_dimension_from_dynkin() {
+    gt_int_t dynkin_1[] = {1},
+             dynkin_2[] = {1, 1},
+             dynkin_3[] = {1, 0},
+             dynkin_4[] = {1, 0, 0};
+
+    assert(dimension_from_dynkin(dynkin_1, 1) == 2);
+    assert(dimension_from_dynkin(dynkin_2, 2) == 8);
+    assert(dimension_from_dynkin(dynkin_3, 2) == 3);
+    assert(dimension_from_dynkin(dynkin_4, 3) == 4);
 }
 
 int main(int argc, char **argv) {
@@ -163,8 +170,9 @@ int main(int argc, char **argv) {
     test_gt_allocate_min_int_pattern();
     test_gt_transpose();
     test_gt_generate_all_transposed();
+    test_dimension_from_dynkin();
 
-    gt_int_t toprow[] = {2, 1, 0};
+    /*gt_int_t toprow[] = {2, 1, 0};
     size_t length = sizeof(toprow) / sizeof(gt_int_t);
 
     gt_int_t *patterns;
@@ -178,12 +186,12 @@ int main(int argc, char **argv) {
         print_pattern_raligned(patterns
             + i * (length * (length + 1) / 2), length);
 
-    mat_int_t *x3 = malloc(sizeof(mat_int_t) * n_patterns * 2);
+    mat_int_t *x3 = malloc(sizeof(mat_int_t) * n_patterns);
 
-    gt_center_generator(&tree, 1, x3, x3 + n_patterns);
+    gt_center_generator_diag(&tree, 1, x3);
 
     for (int i = 0; i < n_patterns; i++) {
-        printf("%d/%d ", x3[i], x3[n_patterns + i]);
+        printf("%d/2 ", x3[i]);
     }
     printf("\n");
 
@@ -192,5 +200,5 @@ int main(int argc, char **argv) {
     printf("--\n");
     gt_lowering_operator(&tree, 1);
 
-    printf("\n");
+    printf("\n");*/
 }

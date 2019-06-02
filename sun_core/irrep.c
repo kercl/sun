@@ -1,12 +1,43 @@
-#include "irrep.h"
+/* Copyright (c) 2018 Clemens Kerschbaumer
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "sun_core/irrep.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-void gt_center_generator_diag(struct gt_tree *patterns,
-                              int l,
-                              mat_int_t *diagonal) {
+gt_int_t* gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
+    gt_int_t *top_row = malloc(sizeof(gt_int_t) * (length + 1));
+
+    top_row[length] = 0;
+    for (int i = length - 1; i >= 0; i--)
+        top_row[i] = top_row[i + 1] + dynkin[i];
+
+    return top_row;
+}
+
+void center_generator_diag_from_gt(struct gt_tree *patterns,
+                                   int l,
+                                   mat_int_t *diagonal) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
            num_patterns = patterns->num_patterns;
@@ -35,7 +66,7 @@ void gt_center_generator_diag(struct gt_tree *patterns,
     }
 }
 
-void gt_lowering_operator(struct gt_tree *patterns, int l) {
+void lowering_operator_from_gt(struct gt_tree *patterns, int l) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
            num_patterns = patterns->num_patterns;
@@ -82,4 +113,11 @@ void gt_lowering_operator(struct gt_tree *patterns, int l) {
             }
         }
     }
+}
+
+size_t dimension_from_dynkin(gt_int_t *dynkin, size_t length) {
+    gt_int_t *top_row = gt_top_row_from_dynkin(dynkin, length);
+    size_t dim = gt_num_of_patterns(top_row, length + 1);
+    free(top_row);
+    return dim;
 }

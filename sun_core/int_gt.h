@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef SOURCE_INT_GT_H_
-#define SOURCE_INT_GT_H_
+#ifndef SUN_CORE_INT_GT_H_
+#define SUN_CORE_INT_GT_H_
 
 #include <stddef.h>
 #include <stdint.h>
@@ -177,4 +177,4 @@ gt_free_tree(struct gt_tree *tree);
 size_t
 gt_locate_in_tree(struct gt_tree *tree, gt_int_t *pattern);
 
-#endif  // SOURCE_INT_GT_H_
+#endif  // SUN_CORE_INT_GT_H_
