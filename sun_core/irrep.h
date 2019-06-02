@@ -30,7 +30,8 @@ typedef int16_t mat_int_t;
 
 /* Convert dynkin label to GT top row
  */
-gt_int_t* gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length);
+gt_int_t*
+gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length);
 
 /* Construct the l-th center generator
  * For GT-patterns of length n, note that
@@ -44,8 +45,9 @@ gt_int_t* gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length);
  * Note: the matrices are normed s.t. the 
  * diagonals are integer valued.
  */
-void center_generator_diag_from_gt(struct gt_tree *patterns,
-                                   int l,
+void
+center_generator_diag_from_gt(struct gt_tree *patterns,
+                                   size_t l,
                                    mat_int_t *diagonal);
 
 /* Construct the l-th lowering operator
@@ -55,10 +57,12 @@ void center_generator_diag_from_gt(struct gt_tree *patterns,
  * 
  * TODO: add documentation
  */
-void lowering_operator_from_gt(struct gt_tree *patterns, int l);
+void
+lowering_operator_from_gt(struct gt_tree *patterns, size_t l);
 
 /* Compute dimension from a given top row
  */
-size_t dimension_from_dynkin(gt_int_t *dynkin, size_t length);
+size_t
+dimension_from_dynkin(gt_int_t *dynkin, size_t length);
 
 #endif  // SUN_CORE_IRREP_H_

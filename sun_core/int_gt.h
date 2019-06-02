@@ -24,8 +24,12 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <limits.h>
 
 typedef int16_t gt_int_t;
+
+#define GT_INT_MAX 0x7FFF
+#define GT_INT_MIN -0x7FFF
 
 /*
  * Simplification of r*n+((r-1)*r)/2+c-r
@@ -35,7 +39,7 @@ typedef int16_t gt_int_t;
 
 struct gt_node {
     struct gt_node *children;
-    size_t index;
+    int index;
 };
 
 struct gt_tree {

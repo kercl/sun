@@ -21,11 +21,11 @@
 
 #include "sun_core/irrep.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-gt_int_t* gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
+gt_int_t*
+gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
     gt_int_t *top_row = malloc(sizeof(gt_int_t) * (length + 1));
 
     top_row[length] = 0;
@@ -35,8 +35,9 @@ gt_int_t* gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
     return top_row;
 }
 
-void center_generator_diag_from_gt(struct gt_tree *patterns,
-                                   int l,
+void
+center_generator_diag_from_gt(struct gt_tree *patterns,
+                                   size_t l,
                                    mat_int_t *diagonal) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
@@ -66,19 +67,20 @@ void center_generator_diag_from_gt(struct gt_tree *patterns,
     }
 }
 
-void lowering_operator_from_gt(struct gt_tree *patterns, int l) {
+void
+lowering_operator_from_gt(struct gt_tree *patterns, size_t l) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
            num_patterns = patterns->num_patterns;
     gt_int_t *pattern_array = patterns->array_representation;
 
     size_t n_entries = (length * (length + 1)) / 2,
-           row_start = n_entries - (row_len * (row_len + 1)) / 2,
-           Mj;
+           row_start = n_entries - (row_len * (row_len + 1)) / 2;
+    int Mj;
 
-    mat_int_t *numerators = malloc(sizeof(mat_int_t) * num_patterns),
-              *denominators = malloc(sizeof(mat_int_t) * num_patterns);
-    int8_t *imaginary = malloc(sizeof(int8_t) * num_patterns);
+    // mat_int_t *numerators = malloc(sizeof(mat_int_t) * num_patterns),
+    //           *denominators = malloc(sizeof(mat_int_t) * num_patterns);
+    // int8_t *imaginary = malloc(sizeof(int8_t) * num_patterns);
 
     int M_lk, M_lkp;
     for (size_t M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
@@ -115,7 +117,8 @@ void lowering_operator_from_gt(struct gt_tree *patterns, int l) {
     }
 }
 
-size_t dimension_from_dynkin(gt_int_t *dynkin, size_t length) {
+size_t
+dimension_from_dynkin(gt_int_t *dynkin, size_t length) {
     gt_int_t *top_row = gt_top_row_from_dynkin(dynkin, length);
     size_t dim = gt_num_of_patterns(top_row, length + 1);
     free(top_row);

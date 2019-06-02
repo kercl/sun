@@ -67,12 +67,14 @@ gt_min_int_pattern(gt_int_t *pattern, gt_int_t *toprow, size_t length) {
     size_t n = (length * (length + 1)) >> 1,
            offset = 0;
 
-    for (int i = 0, j = 0; i < n; ++i, ++j) {
+    for (size_t i = 0, j = 0; i < n; i++) {
         pattern[i] = toprow[offset + j];
 
         if (j == length - offset - 1) {
             offset++;
-            j = -1;
+            j = 0;
+        } else {
+            j++;
         }
     }
 }
@@ -209,7 +211,7 @@ gt_generate_all_transposed(gt_int_t **patterns,
 
     gt_min_int_pattern_transposed(_patterns, toprow, length);
 
-    for (int i = 1; i < n_patterns; ++i) {
+    for (size_t i = 1; i < n_patterns; ++i) {
         memcpy(_patterns + i * n_entries,
                _patterns + (i - 1) * n_entries,
                n_entries * sizeof(gt_int_t));
@@ -244,7 +246,7 @@ _insert_pattern(struct gt_node *node,
     gt_int_t *toprow = pattern;
     size_t d_limit = length - 2;
 
-    for (int d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
+    for (size_t d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
         if (node->children == NULL) {
             node->children = malloc(sizeof(struct gt_node) * (toprow[i] + 1));
             for (int j = 0; j <= toprow[i]; ++j) {
@@ -277,7 +279,7 @@ gt_locate_in_tree(struct gt_tree *tree, gt_int_t *pattern) {
 
     struct gt_node *node = &tree->root;
 
-    for (int d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
+    for (size_t d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
         if (node->children == NULL
             || pattern[d] > pattern[i]
             || pattern[d] < toprow[length - 1])
@@ -314,7 +316,7 @@ gt_list_to_tree(struct gt_tree *tree,
 
 void
 _free_node(gt_int_t *toprow, size_t d, size_t length, struct gt_node *node) {
-    if (length == 0)
+    if (length == 0 || node->children == NULL)
         return;
 
     if (d == length) {
@@ -322,7 +324,7 @@ _free_node(gt_int_t *toprow, size_t d, size_t length, struct gt_node *node) {
         length--;
     }
 
-    for (size_t i; i <= toprow[d]; i++)
+    for (gt_int_t i = 0; i <= toprow[d]; i++)
         _free_node(toprow, d+1, length, node->children + i);
 
     free(node->children);
@@ -330,5 +332,5 @@ _free_node(gt_int_t *toprow, size_t d, size_t length, struct gt_node *node) {
 
 void
 gt_free_tree(struct gt_tree *tree) {
-    _free_node(tree->array_representation, 0, tree->length, &tree->root);
+    _free_node(tree->array_representation, 0, tree->length - 1, &tree->root);
 }

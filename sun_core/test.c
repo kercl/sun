@@ -131,7 +131,30 @@ void test_gt_transpose() {
     free(pattern);
 }
 
-void test_gt_generate_all_transposed() {
+void test_gt_generate_all_transposed_1() {
+    gt_int_t toprow[] = {2, 1, 0};
+    size_t length = 3;
+
+    gt_int_t *patterns;
+    size_t n_entries;
+
+    assert(gt_num_of_patterns(toprow, length) == 8);
+
+    gt_generate_all(&patterns, &n_entries, toprow, length);
+    struct gt_tree tree;
+    gt_list_to_tree(&tree, patterns, n_entries, length);
+
+    int m = length * (length + 1) >> 1;
+
+    for (int i = 0; i < n_entries; ++i)
+        assert(i == gt_locate_in_tree(&tree, patterns + i * m));
+    assert(n_entries == 8);
+
+    gt_free_tree(&tree);
+    free(patterns);
+}
+
+void test_gt_generate_all_transposed_2() {
     gt_int_t toprow[] = {3, 2, 1, 0};
     size_t length = 4;
 
@@ -151,6 +174,7 @@ void test_gt_generate_all_transposed() {
     assert(n_entries == 64);
 
     gt_free_tree(&tree);
+    free(patterns);
 }
 
 void test_dimension_from_dynkin() {
@@ -169,7 +193,7 @@ int main(int argc, char **argv) {
     test__array_increment_by_limits();
     test_gt_allocate_min_int_pattern();
     test_gt_transpose();
-    test_gt_generate_all_transposed();
+    test_gt_generate_all_transposed_2();
     test_dimension_from_dynkin();
 
     /*gt_int_t toprow[] = {2, 1, 0};
