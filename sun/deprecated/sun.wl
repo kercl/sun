@@ -235,4 +235,8 @@ SU3[p_,q_]:=Module[{
 ]
 
 
-SU2[p_]:=SUNLieAlgebraIrep@{p}
+SU2[p_]:=Module[{
+	X=SUNLieAlgebraIrep@{p}
+},
+	Association[Table[i->X[[i]],{i,Length[X]}]]
+]
