@@ -24,7 +24,7 @@
 
 #include <stdint.h>
 
-#include "sun_core/int_gt.h"
+#include "int_gt.h"
 
 typedef int16_t mat_int_t;
 

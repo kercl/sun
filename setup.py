@@ -3,11 +3,11 @@ from Cython.Build import cythonize
 from distutils.extension import Extension
 
 sourcefiles = [
-  "src/__init__pyx",
+  "src/sun.pyx",
   "src/symbolic.pyx",
   "src/numeric.pyx",
-  "int_gt.cc",
-  "irrep.c"
+  "src/int_gt.c",
+  "src/irrep.c"
 ]
 
 extensions = [Extension("sun", sourcefiles)]

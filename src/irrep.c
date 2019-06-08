@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-#include "sun_core/irrep.h"
+#include "irrep.h"
 
 #include <stdlib.h>
 #include <stdint.h>

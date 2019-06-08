@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "sun_core/int_gt.h"
+#include "int_gt.h"
 
 /* Increments the first entry i0 of arr
  * for that arr[i0] < upper_lim[i0]
