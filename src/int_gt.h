@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <limits.h>
 
-typedef short int gt_int_t;
+typedef int16_t gt_int_t;
 
 #define GT_INT_MAX 0x7FFF
 #define GT_INT_MIN -0x7FFF
@@ -100,12 +100,6 @@ gt_multi_transpose(gt_int_t *patterns, size_t num_patterns, size_t length);
  */
 gt_int_t*
 gt_allocate_min_int_pattern(gt_int_t *toprow, size_t length);
-
-/* Generate all possible GT patterns for
- * a given top-row.
- */
-gt_int_t*
-gt_patterns_generate(gt_int_t *toprow, size_t length);
 
 /* Generate all possible GT patterns for
  * a given top row in transposed form

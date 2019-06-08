@@ -2,16 +2,20 @@ from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
 
-sourcefiles = [
+source_files = [
   "src/sun.pyx",
-  "src/symbolic.pyx",
-  "src/numeric.pyx",
   "src/int_gt.c",
   "src/irrep.c"
 ]
 
-extensions = [Extension("sun", sourcefiles)]
+extensions = [
+  Extension("sun", 
+            source_files,
+            include_dirs=["."])
+]
 
 setup(
-    ext_modules=cythonize(extensions)
+  name="sun",
+  packages=["sun"],
+  ext_modules=cythonize(extensions)
 )

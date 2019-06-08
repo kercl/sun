@@ -26,14 +26,15 @@
 
 #include "int_gt.h"
 
-typedef short int mat_int_t;
+typedef int16_t mat_int_t;
 
 /* Convert dynkin label to GT top row
  */
 gt_int_t*
 gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length);
 
-/* Construct the l-th center generator
+/* Construct the l-th generator of the Cartan
+ * subalgebra.
  * For GT-patterns of length n, note that
  *
  * l = 1,...,n-1
@@ -42,13 +43,15 @@ gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length);
  * of length tree->num_patterns. The entries
  * are the diagonal entries of the center
  * generators.
- * Note: the matrices are normed s.t. the 
+ * Note: the matrices are normed s.t. the
  * diagonals are integer valued.
+ * To obtain the same entries as in [ref]
+ * divide by 2.
  */
 void
-center_generator_diag_from_gt(struct gt_tree *patterns,
-                                   size_t l,
-                                   mat_int_t *diagonal);
+csa_generator_diag_from_gt(struct gt_tree *patterns,
+                           size_t l,
+                           mat_int_t *diagonal);
 
 /* Construct the l-th lowering operator
  * For GT-patterns of length n, note that

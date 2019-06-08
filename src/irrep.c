@@ -36,9 +36,9 @@ gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
 }
 
 void
-center_generator_diag_from_gt(struct gt_tree *patterns,
-                                   size_t l,
-                                   mat_int_t *diagonal) {
+csa_generator_diag_from_gt(struct gt_tree *patterns,
+                           size_t l,
+                           mat_int_t *diagonal) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
            num_patterns = patterns->num_patterns;
