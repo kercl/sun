@@ -1,4 +1,4 @@
-# ![](images/sun.png) Toolkit
+# $SU(n)$ Toolkit
 
 This software package aims to provide several tools for working with representations of the spection unitary group $SU(n)$ and its Lie-algreba $\mathfrak{su}(n)$.
 
@@ -15,7 +15,7 @@ Python requirements:
 
 ### Python
 
-Irreducibe matrix representations based on a given Dynkin labels can easily be generated. As a sample let's construct Pauli's matrices as an irrep of $\mathfrak{su}(2)$ and Gell-Mann matrices as an irrep of $\mathfrak{su}(3)$.
+Irreducibe matrix representations based on a given Dynkin labels can easily be generated. As a sample let's construct Pauli's matrices as an irrep of $\mathfrak{su}(2)$ and Gell-Mann matrices as an irrep of ![](images/sun.svg).
 
 ```python
 import sun.numeric as sun
