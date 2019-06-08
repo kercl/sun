@@ -1,8 +1,17 @@
-from distutils.core import setup, Extension
+from distutils.core import setup
+from Cython.Build import cythonize
+from distutils.extension import Extension
 
-setup(name = 'sun_core', version = '1.0',  \
-   ext_modules = [Extension('sun_core', [
-       'sun_core/int_gt.c',
-       'sun_core/irrep.c',
-       'sun_core/suncoremodule.c',
-   ], include_dirs=['.'])])
+sourcefiles = [
+  "src/__init__pyx",
+  "src/symbolic.pyx",
+  "src/numeric.pyx",
+  "int_gt.cc",
+  "irrep.c"
+]
+
+extensions = [Extension("sun", sourcefiles)]
+
+setup(
+    ext_modules=cythonize(extensions)
+)
