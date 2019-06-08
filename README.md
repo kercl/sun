@@ -1,4 +1,4 @@
-# ![](https://latex.codecogs.com/gif.download?%5Clarge%20SU%28n%29) Toolkit
+# ![](images/sun.png) Toolkit
 
 This software package aims to provide several tools for working with representations of the spection unitary group $SU(n)$ and its Lie-algreba $\mathfrak{su}(n)$.
 
@@ -23,7 +23,7 @@ import sun.numeric as sun
 irrep = sun.Irrep(dynkin=[1])
 irrep
 ```
-Output: ![](https://latex.codecogs.com/gif.download?D%281%29)
+Output: ![](images/d1.png)
 
 This does not yet generate the matrices. However once we iterate over `irrep` or access an element throught `__getitem__` the matrices are built and stored within the object. The construction can also manually invoked through the function `construct_matrices`.
 
@@ -32,7 +32,7 @@ irrep.construct_matrices()
 for X in irrep:
     print(X, end=" ")
 ```
-Output: ![](https://latex.codecogs.com/gif.download?%5Cbegin%7Bpmatrix%7D%200%20%26%201%20%5C%5C%201%20%26%200%20%5Cend%7Bpmatrix%7D%5C%20%5Cbegin%7Bpmatrix%7D%200%20%26%20i%20%5C%5C%20-i%20%26%200%20%5Cend%7Bpmatrix%7D%5C%20%5Cbegin%7Bpmatrix%7D%201%20%26%200%20%5C%5C%200%20%26%20-1%20%5Cend%7Bpmatrix%7D)
+Output: ![](images/matrices.png)
 
 ### Mathematica
 
