@@ -1,10 +1,15 @@
-from sun cimport IrrepBase
+from scipy.sparse import dia_matrix
 
-cdef class IrrepNumeric(IrrepBase):
+from sun.core cimport IrrepBase
+
+cdef class Irrep(IrrepBase):
   """
-  Stores the values in numpy arrays
+  Stores the values in numpy resp. scipy arrays
   """
 
-  def cartan(self):
-    if self._gt_basis.num_patterns == 0:
-      self._construct_gt_basis()
+  def cartan(self, l):
+    if self._cache_cartan[l] is None:
+      diag = self._build_cartan_diagonal(l).astype("f") / 2.0
+      self._cache_cartan[l] = dia_matrix((diag, 0), shape=(self.dim, self.dim))
+
+    return self._cache_cartan[l]

@@ -3,7 +3,6 @@ from cython.view cimport array as cvarray
 from libc.stdlib cimport malloc, free
 
 import numpy as np
-from scipy.sparse import dia_matrix
 
 cdef extern from "int_gt.h":
   cdef struct gt_tree:
@@ -142,7 +141,7 @@ cdef class IrrepBase:
     cdef mat_int_t *diagonal = <mat_int_t*>malloc(self.dim * cython.sizeof(mat_int_t))
     csa_generator_diag_from_gt(&self._gt_basis, l + 1, diagonal)
 
-    narr = np.full(self.dim, 0, dtype=np.dtype("i"))
+    narr = np.ndarray(shape=self.dim, dtype=np.dtype("i"))
     cdef int [:] narr_view = narr
 
     for i in range(self.dim):
@@ -159,15 +158,3 @@ cdef class IrrepBase:
   def __dealloc__(self):
     self.drop_basis()
     free(self._gt_top_row)
-
-cdef class IrrepNumeric(IrrepBase):
-  """
-  Stores the values in numpy resp. scipy arrays
-  """
-
-  def cartan(self, l):
-    if self._cache_cartan[l] is None:
-      diag = self._build_cartan_diagonal(l).astype("f") / 2.0
-      self._cache_cartan[l] = dia_matrix((diag, 0), shape=(self.dim, self.dim))
-
-    return self._cache_cartan[l]
