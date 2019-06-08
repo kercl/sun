@@ -8,5 +8,6 @@ cdef class IrrepBase:
     cdef gt_int_t *_gt_top_row
     cdef size_t _length
     cdef gt_tree _gt_basis
+    cdef list _cache_cartan
 
     cdef _construct_gt_basis(self)

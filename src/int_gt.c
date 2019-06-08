@@ -331,6 +331,8 @@ _free_node(gt_int_t *toprow, size_t d, size_t length, struct gt_node *node) {
 }
 
 void
-gt_free_tree(struct gt_tree *tree) {
+gt_free_tree(struct gt_tree *tree, int free_array) {
     _free_node(tree->array_representation, 0, tree->length - 1, &tree->root);
+    if(free_array)
+        free(tree->array_representation);
 }

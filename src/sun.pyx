@@ -1,33 +1,24 @@
 cimport cython
+from cython.view cimport array as cvarray
 from libc.stdlib cimport malloc, free
+
+import numpy as np
+from scipy.sparse import dia_matrix
 
 cdef extern from "int_gt.h":
   cdef struct gt_tree:
+    gt_int_t *array_representation
     size_t num_patterns
 
-  size_t gt_num_of_patterns(gt_int_t *toprow, size_t length) nogil
+  size_t gt_num_of_patterns(gt_int_t *toprow, size_t length)
+  void gt_free_tree(gt_tree *tree, int free_array)
   void gt_generate_all(gt_int_t **pattern, size_t *num_entries, gt_int_t *toprow, size_t length) nogil
-
+  void gt_list_to_tree(gt_tree *tree, gt_int_t *patterns, size_t num_patterns, size_t length) nogil
 
 cdef extern from "irrep.h":
   ctypedef int mat_int_t
 
   void csa_generator_diag_from_gt(gt_tree *patterns, size_t l, mat_int_t *diagonal)
-
-
-cdef class CartanSubalgebra:
-  """
-  Generates the Cartan subalgebra for a given Irrep
-  """
-
-  def __getitem__(self, i):
-    if self._cache[i] is not None:
-      return self._cache[i]
-
-  def __init__(self, irrep):
-    self._irrep = irrep
-    self._cache = [None] * irrep.dim_csa
-
 
 cdef class IrrepBase:
   """
@@ -90,8 +81,10 @@ cdef class IrrepBase:
                       self._gt_top_row,
                       self._length)
 
-    for i in range(6):
-      print(patterns[i])
+      gt_list_to_tree(&self._gt_basis,
+                      patterns,
+                      num_patterns,
+                      self._length)
 
   @property
   def dim_csa(self):
@@ -102,15 +95,24 @@ cdef class IrrepBase:
     return self._length - 1
 
   @property
+  def N(self):
+    return self._length
+  
+  @property
+  def num_of_generators(self):
+    return self._length ** 2 - 1
+
+  @property
   def dim(self):
     """
     Return the dimension of the representation
     """
+    if self._gt_basis.num_patterns > 0:
+      return self._gt_basis.num_patterns
 
     cdef int d
-    with nogil:
-      d = gt_num_of_patterns(self._gt_top_row, self._length)
-    
+    d = gt_num_of_patterns(self._gt_top_row, self._length)
+
     return int(d)
 
   @property
@@ -131,14 +133,41 @@ cdef class IrrepBase:
 
     self._gt_basis.num_patterns = 0
 
+    self._cache_cartan = [None] * self.dim_csa
+
+  def _build_cartan_diagonal(self, l):
+    if self._gt_basis.num_patterns == 0:
+      self._construct_gt_basis()
+
+    cdef mat_int_t *diagonal = <mat_int_t*>malloc(self.dim * cython.sizeof(mat_int_t))
+    csa_generator_diag_from_gt(&self._gt_basis, l + 1, diagonal)
+
+    narr = np.full(self.dim, 0, dtype=np.dtype("i"))
+    cdef int [:] narr_view = narr
+
+    for i in range(self.dim):
+      narr_view[i] = diagonal[i]
+
+    free(diagonal)
+    return narr
+
+  def drop_basis(self):
+    if self._gt_basis.num_patterns > 0:
+      gt_free_tree(&self._gt_basis, 1)
+      self._gt_basis.num_patterns = 0
+
   def __dealloc__(self):
+    self.drop_basis()
     free(self._gt_top_row)
 
 cdef class IrrepNumeric(IrrepBase):
   """
-  Stores the values in numpy arrays
+  Stores the values in numpy resp. scipy arrays
   """
 
-  def cartan(self):
-    if self._gt_basis.num_patterns == 0:
-      self._construct_gt_basis()
+  def cartan(self, l):
+    if self._cache_cartan[l] is None:
+      diag = self._build_cartan_diagonal(l).astype("f") / 2.0
+      self._cache_cartan[l] = dia_matrix((diag, 0), shape=(self.dim, self.dim))
+
+    return self._cache_cartan[l]
