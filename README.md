@@ -39,7 +39,7 @@ Output: ![](images/matrices.png)
 ## Planned features
 
 - [x] Generate irreducible representations from Dynkin labels
-- [ ] Python bindings
+- [x] Python bindings
 - [ ] Mathematica bindings
 - [ ] Decompose tensor products into irreducible representations
 - [ ] Matrix exponentials
