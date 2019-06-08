@@ -15,7 +15,8 @@ Python requirements:
 
 ### Python
 
-Irreducibe matrix representations based on a given Dynkin labels can easily be generated. As a sample let's construct Pauli's matrices as an irrep of $\mathfrak{su}(2)$ and Gell-Mann matrices as an irrep of ![](images/sun.svg).
+Irreducibe matrix representations based on a given Dynkin labels can easily be generated. As a sample let's construct Pauli's matrices as an irrep of $\mathfrak{su}(2)$ and Gell-Mann matrices as an irrep of 
+<img src="images/sun.svg" style="vertical-align:middle" />.
 
 ```python
 import sun.numeric as sun
