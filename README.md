@@ -23,7 +23,11 @@ import sun.numeric as sun
 irrep = sun.Irrep(dynkin=[1])
 irrep
 ```
-Output: <sub><sub><img alt="D(1)" src="images/4d048db56d0e2e4ff4be1777263c483e.svg" /></sub></sub>
+Output: 
+
+<p align="center"><img alt="D(1)" src="images/ad0777e189b4b22f46807d3878e4e72c.svg" /></p>
+
+
 
 This does not yet generate the matrices. However once we iterate over `irrep` or access an element throught `__getitem__` the matrices are built and stored within the object. The construction can also manually invoked through the function `construct_matrices`.
 
@@ -32,7 +36,11 @@ irrep.construct_matrices()
 for X in irrep:
     print(X, end=" ")
 ```
-Output: <sub><sub><img alt="\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \begin{pmatrix} 0 & i \\ -i & 0 \end{pmatrix},\ \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}" src="images/5bcaddbe725ea06ecf87ac71d47a2e08.svg" /></sub></sub>
+Output: 
+
+<p align="center"><img alt="\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \begin{pmatrix} 0 & i \\ -i & 0 \end{pmatrix},\ \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}" src="images/e89d0222b50b5ffd1c309b51bc20be51.svg" /></p>
+
+
 
 ### Mathematica
 
