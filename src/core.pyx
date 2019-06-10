@@ -1,6 +1,7 @@
 cimport cython
 from cython.view cimport array as cvarray
 from libc.stdlib cimport malloc, free
+from itertools import combinations
 
 import numpy as np
 
@@ -104,8 +105,20 @@ cdef class IrrepBase:
     return self._length
   
   @property
-  def num_of_generators(self):
+  def dim_lie_algebra(self):
+    """
+    Returns the dimension of the Lie algebra
+    """
+
     return self._length ** 2 - 1
+
+  @property
+  def num_root_generators(self):
+    """
+    Returns the number of root generators
+    """
+
+    return self._length - 1
 
   @property
   def dim(self):
