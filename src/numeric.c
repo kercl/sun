@@ -840,6 +840,7 @@ struct __pyx_obj_3sun_4core_IrrepBase {
   size_t _length;
   struct gt_tree _gt_basis;
   PyObject *_cache_cartan;
+  PyObject *_cache_lowering;
 };
 
 

@@ -24,8 +24,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "sun_core/int_gt.h"
-#include "sun_core/irrep.h"
+#include "int_gt.h"
+#include "irrep.h"
 
 int _array_increment_by_limits(gt_int_t *arr,
                                size_t length,
@@ -150,8 +150,7 @@ void test_gt_generate_all_transposed_1() {
         assert(i == gt_locate_in_tree(&tree, patterns + i * m));
     assert(n_entries == 8);
 
-    gt_free_tree(&tree);
-    free(patterns);
+    gt_free_tree(&tree, 1);
 }
 
 void test_gt_generate_all_transposed_2() {
@@ -173,8 +172,7 @@ void test_gt_generate_all_transposed_2() {
         assert(i == gt_locate_in_tree(&tree, patterns + i * m));
     assert(n_entries == 64);
 
-    gt_free_tree(&tree);
-    free(patterns);
+    gt_free_tree(&tree, 1);
 }
 
 void test_dimension_from_dynkin() {

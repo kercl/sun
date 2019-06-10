@@ -60,8 +60,13 @@ csa_generator_diag_from_gt(struct gt_tree *patterns,
  * 
  * TODO: add documentation
  */
-void
-lowering_operator_from_gt(struct gt_tree *patterns, size_t l);
+size_t
+lowering_operator_from_gt(struct gt_tree *patterns,
+                          size_t l,
+                          mat_int_t **ptr_numerators,
+                          mat_int_t **ptr_denominators,
+                          size_t **ptr_row,
+                          size_t **ptr_col);
 
 /* Compute dimension from a given top row
  */

@@ -18,6 +18,12 @@ cdef extern from "irrep.h":
   ctypedef int mat_int_t
 
   void csa_generator_diag_from_gt(gt_tree *patterns, size_t l, mat_int_t *diagonal)
+  size_t lowering_operator_from_gt(gt_tree *patterns,
+                                   size_t l,
+                                   mat_int_t **numerators,
+                                   mat_int_t **denominators,
+                                   size_t **row,
+                                   size_t **col)
 
 cdef class IrrepBase:
   """
@@ -133,6 +139,7 @@ cdef class IrrepBase:
     self._gt_basis.num_patterns = 0
 
     self._cache_cartan = [None] * self.dim_csa
+    self._cache_lowering = [None] * self.dim_csa
 
   def _build_cartan_diagonal(self, l):
     if self._gt_basis.num_patterns == 0:
@@ -148,6 +155,36 @@ cdef class IrrepBase:
       narr_view[i] = diagonal[i]
 
     free(diagonal)
+    return narr
+
+  def _build_lowering_operator_entries(self, l):
+    if self._gt_basis.num_patterns == 0:
+      self._construct_gt_basis()
+
+    cdef mat_int_t *numerators
+    cdef mat_int_t *denominators
+    cdef size_t *rows
+    cdef size_t *cols
+    cdef size_t num_entries
+
+    num_entries = lowering_operator_from_gt(&self._gt_basis, l + 1,
+                                            &numerators, &denominators,
+                                            &rows, &cols)
+
+    narr = np.ndarray(shape=(num_entries, 4), dtype=np.dtype("i"))
+    cdef int [:, :] narr_view = narr
+
+    for i in range(num_entries):
+      narr_view[i, 0] = rows[i]
+      narr_view[i, 1] = cols[i]
+      narr_view[i, 2] = numerators[i]
+      narr_view[i, 3] = denominators[i]
+
+    free(numerators)
+    free(denominators)
+    free(rows)
+    free(cols)
+
     return narr
 
   def drop_basis(self):

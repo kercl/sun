@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#define SIGN(x) ((x) < 0 ? -1: 1)
+#define ABS(x) ((x) < 0 ? -(x): (x))
+
 gt_int_t*
 gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
     gt_int_t *top_row = malloc(sizeof(gt_int_t) * (length + 1));
@@ -52,23 +55,28 @@ csa_generator_diag_from_gt(struct gt_tree *patterns,
         for (size_t j = 0; j < row_len; j++) {
             if (j < row_len) {
                 // sum over row l
-                diagonal[Mi] +=
+                diagonal[Mi] -=
                     2 * pattern_array[M + row_start + j];
             }
             if (j < row_len - 1 && l < length) {
                 // sum over row l-1
-                diagonal[Mi] -=
+                diagonal[Mi] +=
                     pattern_array[M + row_start + row_len + j];
             }
             // sum over row l+1
-            diagonal[Mi] -=
+            diagonal[Mi] +=
                 pattern_array[M + row_start - (row_len + 1) + j];
         }
     }
 }
 
-void
-lowering_operator_from_gt(struct gt_tree *patterns, size_t l) {
+size_t
+lowering_operator_from_gt(struct gt_tree *patterns,
+                          size_t l,
+                          mat_int_t **ptr_numerators,
+                          mat_int_t **ptr_denominators,
+                          size_t **ptr_row,
+                          size_t **ptr_col) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
            num_patterns = patterns->num_patterns;
@@ -78,9 +86,11 @@ lowering_operator_from_gt(struct gt_tree *patterns, size_t l) {
            row_start = n_entries - (row_len * (row_len + 1)) / 2;
     int Mj;
 
-    // mat_int_t *numerators = malloc(sizeof(mat_int_t) * num_patterns),
-    //           *denominators = malloc(sizeof(mat_int_t) * num_patterns);
-    // int8_t *imaginary = malloc(sizeof(int8_t) * num_patterns);
+    size_t entry_counter = 0, array_sizes = 2 * num_patterns;
+    mat_int_t *numerators = malloc(sizeof(mat_int_t) * array_sizes),
+              *denominators = malloc(sizeof(mat_int_t) * array_sizes);
+    size_t *row = malloc(sizeof(size_t) * array_sizes),
+           *col = malloc(sizeof(size_t) * array_sizes);
 
     int M_lk, M_lkp;
     for (size_t M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
@@ -113,8 +123,28 @@ lowering_operator_from_gt(struct gt_tree *patterns, size_t l) {
                 numerator *= pattern_array[M + row_start - (row_len + 1) + k_p]
                              - M_lk + k - k_p + 1;
             }
+
+            numerators[entry_counter] = ABS(numerator);
+            denominators[entry_counter] = ABS(denominator);
+            row[entry_counter] = Mi;
+            col[entry_counter] = Mj;
+
+            entry_counter++;
+            if(entry_counter == array_sizes) {
+                array_sizes += num_patterns;
+                numerators = realloc(numerators, sizeof(mat_int_t) * array_sizes);
+                denominators = realloc(denominators, sizeof(mat_int_t) * array_sizes);
+                row = realloc(row, sizeof(mat_int_t) * array_sizes);
+                col = realloc(col, sizeof(mat_int_t) * array_sizes);
+            }
         }
     }
+    *ptr_numerators = realloc(numerators, sizeof(mat_int_t) * entry_counter);
+    *ptr_denominators = realloc(denominators, sizeof(mat_int_t) * entry_counter);
+    *ptr_row = realloc(row, sizeof(mat_int_t) * entry_counter);
+    *ptr_col = realloc(col, sizeof(mat_int_t) * entry_counter);
+
+    return entry_counter;
 }
 
 size_t

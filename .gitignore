@@ -7,4 +7,4 @@ test_int_gt
 build
 *.so
 *.sh
-sun
+/sun
