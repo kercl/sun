@@ -1,0 +1,285 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      9117,        277]
+NotebookOptionsPosition[      7594,        219]
+NotebookOutlinePosition[      7928,        234]
+CellTagsIndexPosition[      7885,        231]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Setup of Mathematica Library ", "Section",
+ CellChangeTimes->{{3.76959330090627*^9, 3.7695933668487*^9}}],
+
+Cell[TextData[{
+ "There are two possibilities to make ",
+ StyleBox["sun",
+  FontWeight->"Bold"],
+ " available to Mathematica. Since the core library is written in C for \
+maximal performance, you have to first obtain a shared library. That is on \
+windows a DLL, on Linux an so-object and on Mac a dynlib. You can either \
+download a release from the GitHub page, or you compile the library yourself. \
+The latter requires that a compiler is installed on your system. "
+}], "Text",
+ InitializationCell->True,
+ CellChangeTimes->{{3.769593370020213*^9, 3.769593600640668*^9}, {
+  3.769593753543119*^9, 3.7695937769395103`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Core library", "Subsection",
+ CellChangeTimes->{{3.769594817970327*^9, 3.769594821199018*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Installing a pre-build release", "Subsubsection",
+ CellChangeTimes->{{3.7695936026298933`*^9, 3.7695936078701897`*^9}, {
+  3.7695936530397377`*^9, 3.769593676275979*^9}, {3.769594823674164*^9, 
+  3.769594825528681*^9}}],
+
+Cell[TextData[{
+ "Note that pre-build releases are only available for Linux and Windows at \
+the moment and are build against 64 bit system.\nThe can be downloaded here:\n\
+\n",
+ StyleBox["TODO",
+  FontSlant->"Italic"]
+}], "Text",
+ CellChangeTimes->{{3.76959367789642*^9, 3.7695937415831347`*^9}, {
+  3.769593782540629*^9, 3.769593802605896*^9}, {3.769593847670404*^9, 
+  3.769593858324533*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Compiling the core library", "Subsubsection",
+ CellChangeTimes->{{3.7695938653859863`*^9, 3.769593876939704*^9}, {
+  3.769594615211211*^9, 3.7695946169438868`*^9}, {3.769594827754827*^9, 
+  3.769594828650607*^9}}],
+
+Cell["\<\
+Luckily Mathematica provides excellent support for loading external \
+libraries. We first have to import the C compiler package\
+\>", "Text",
+ CellChangeTimes->{{3.76959388059586*^9, 3.769593931176106*^9}}],
+
+Cell[BoxData[
+ RowBox[{"<<", "CCompilerDriver`"}]], "Input",
+ CellChangeTimes->{{3.769593932343836*^9, 3.769593966882456*^9}, {
+  3.769594444047374*^9, 3.7695944516362963`*^9}, {3.7695949591078777`*^9, 
+  3.769594961730093*^9}}],
+
+Cell["and then a simple", "Text",
+ CellChangeTimes->{{3.7695939817135143`*^9, 3.769593993263569*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"sunlib", "=", 
+   RowBox[{"CreateLibrary", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"Function", "[", 
+       RowBox[{
+        RowBox[{"{", "fname", "}"}], ",", " ", 
+        RowBox[{
+         RowBox[{"NotebookDirectory", "[", "]"}], "<>", "fname"}]}], "]"}], "/@", 
+      RowBox[{"{", "\[IndentingNewLine]", 
+       RowBox[{
+       "\"\<src/int_gt.c\>\"", ",", "\[IndentingNewLine]", 
+        "\"\<src/irrep.c\>\""}], "\[IndentingNewLine]", "}"}]}], ",", 
+     "\"\<sun\>\""}], "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.7695899983600903`*^9, 3.7695899983610764`*^9}, {
+  3.769590160908972*^9, 3.76959016145516*^9}, {3.7695901928239737`*^9, 
+  3.769590196634767*^9}, {3.7695904538405733`*^9, 3.7695904553861837`*^9}, {
+  3.769594004635538*^9, 3.7695941496130247`*^9}, {3.7695943083296547`*^9, 
+  3.769594309151307*^9}, {3.7695944585844088`*^9, 3.7695944591144447`*^9}}],
+
+Cell["This created a shared library object", "Text",
+ CellChangeTimes->{{3.769594168610956*^9, 3.769594213208008*^9}, {
+  3.769594316656639*^9, 3.7695943204191008`*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["sunlib"], "Input",
+ CellChangeTimes->{{3.7695943128038*^9, 3.769594313151083*^9}, {
+  3.769594461314135*^9, 3.769594461599926*^9}}],
+
+Cell[BoxData["\<\"/home/koe/.Mathematica/SystemFiles/LibraryResources/Linux-\
+x86-64/sun.so\"\>"], "Output",
+ CellChangeTimes->{{3.769594313481084*^9, 3.769594322223248*^9}, 
+   3.7695944619364*^9, 3.7695949654635067`*^9, 3.769594999881158*^9}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Installing Mathematica library", "Subsection",
+ CellChangeTimes->{{3.769594627998351*^9, 3.769594661290649*^9}}],
+
+Cell[TextData[{
+ "The previous sections only made the core library available to Mathematica. \
+The functions that are being used in Mathematica are defined in the file \
+\[OpenCurlyDoubleQuote]src/SUN.m\[CloseCurlyDoubleQuote]. This file can be \
+easily installed through \[OpenCurlyDoubleQuote]File",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", "\[Rule]"}], TraditionalForm]]],
+ " Install...\[CloseCurlyDoubleQuote] and selecting the file."
+}], "Text",
+ CellChangeTimes->{{3.769594646719111*^9, 3.769594792813571*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Testing everything", "Subsection",
+ CellChangeTimes->{{3.769594801913559*^9, 3.769594809727058*^9}}],
+
+Cell["Now the library should be available. Let\[CloseCurlyQuote]s test this \
+out", "Text",
+ CellChangeTimes->{{3.7695948594753*^9, 3.769594882680032*^9}, {
+  3.769594918583796*^9, 3.769594925173526*^9}}],
+
+Cell[BoxData[
+ RowBox[{"<<", "SUN`"}]], "Input",
+ CellChangeTimes->{{3.769594927167616*^9, 3.769594954288334*^9}}],
+
+Cell[BoxData[
+ RowBox[{"d10", " ", "=", " ", 
+  RowBox[{"SUNIrrepDynkin", "[", 
+   RowBox[{"1", ",", "0"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.7695949307440166`*^9, 3.769594937946876*^9}, {
+  3.7695950834118156`*^9, 3.769595084445691*^9}, {3.7695951776399193`*^9, 
+  3.76959518160638*^9}, {3.769595243349525*^9, 3.769595245203271*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SUNLieMatrix", "[", 
+  RowBox[{"irrep", ",", " ", "1"}], "]"}]], "Input",
+ CellChangeTimes->{{3.769595054795866*^9, 3.769595146582741*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SUNLieMatrix", "[", 
+  RowBox[{"\<\"D(1, 0)\"\>", ",", "1"}], "]"}]], "Output",
+ CellChangeTimes->{{3.769595088039502*^9, 3.769595105758429*^9}, 
+   3.76959514708947*^9, 3.769595184605495*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SUNIrrepDecompose", "[", 
+  RowBox[{"CirclePlus", "[", 
+   RowBox[{
+    RowBox[{"TensorProduct", "[", 
+     RowBox[{"d10", ",", "d10"}], "]"}], ",", 
+    RowBox[{"TensorProduct", "[", 
+     RowBox[{"d10", ",", "d10"}], "]"}]}], "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.769595222455133*^9, 3.769595317323844*^9}, {
+  3.76959534736476*^9, 3.769595383720586*^9}, {3.7695955276123857`*^9, 
+  3.7695955284114027`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SUNIrrepDecompose", "[", 
+  RowBox[{
+   RowBox[{"\<\"D(1, 0)\"\>", "\[TensorProduct]", "\<\"D(1, 0)\"\>"}], 
+   "\[CirclePlus]", 
+   RowBox[{"\<\"D(1, 0)\"\>", "\[TensorProduct]", "\<\"D(1, 0)\"\>"}]}], 
+  "]"}]], "Output",
+ CellChangeTimes->{{3.769595256907736*^9, 3.769595269574458*^9}, {
+   3.7695953564827633`*^9, 3.7695953842833967`*^9}, 3.7695955291966057`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"SUNCartanGenerator", "[", 
+  RowBox[{"irrep", ",", "1"}], "]"}]], "Input",
+ CellChangeTimes->{{3.769595816063242*^9, 3.769595831556076*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SUNCartanGenerator", "[", 
+  RowBox[{"\<\"D(1, 0)\"\>", ",", "1"}], "]"}]], "Output",
+ CellChangeTimes->{3.769595832248604*^9}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1920, 1025},
+WindowMargins->{{1, Automatic}, {Automatic, 2}},
+FrontEndVersion->"11.0 for Linux x86 (64-bit) (July 28, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 111, 1, 65, "Section"],
+Cell[694, 25, 625, 12, 51, "Text",
+ InitializationCell->True],
+Cell[CellGroupData[{
+Cell[1344, 41, 100, 1, 45, "Subsection"],
+Cell[CellGroupData[{
+Cell[1469, 46, 225, 3, 35, "Subsubsection"],
+Cell[1697, 51, 395, 9, 88, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2129, 65, 219, 3, 35, "Subsubsection"],
+Cell[2351, 70, 216, 4, 31, "Text"],
+Cell[2570, 76, 228, 4, 32, "Input"],
+Cell[2801, 82, 101, 1, 31, "Text"],
+Cell[2905, 85, 915, 20, 102, "Input"],
+Cell[3823, 107, 169, 2, 31, "Text"],
+Cell[CellGroupData[{
+Cell[4017, 113, 145, 2, 30, "Input"],
+Cell[4165, 117, 244, 3, 32, "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4470, 127, 118, 1, 45, "Subsection"],
+Cell[4591, 130, 517, 10, 31, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5145, 145, 106, 1, 45, "Subsection"],
+Cell[5254, 148, 204, 3, 31, "Text"],
+Cell[5461, 153, 114, 2, 30, "Input"],
+Cell[5578, 157, 341, 6, 32, "Input"],
+Cell[CellGroupData[{
+Cell[5944, 167, 163, 3, 35, "Input"],
+Cell[6110, 172, 216, 4, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6363, 181, 442, 10, 35, "Input"],
+Cell[6808, 193, 391, 8, 32, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7236, 206, 164, 3, 35, "Input"],
+Cell[7403, 211, 151, 3, 32, "Output"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

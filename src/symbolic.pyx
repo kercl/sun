@@ -26,29 +26,32 @@ cdef class Irrep(IrrepBase):
 
     return self._cache_cartan[l]
 
-  def lowering(self, l):
+  def _root_lowering(self, l):
     if self._cache_lowering[l] is None:
       entries = self._build_lowering_operator_entries(l)
       self._cache_lowering[l] = self._coord_sparse(entries)
 
     return self._cache_lowering[l]
 
-  def raising(self, l):
+  def _root_raising(self, l):
     return self.lowering(l).adjoint()
 
-  def _raising_op_from_root_gen(self, k, l):
-    if k == l:
-      return self.raising(k)
+  def _lowering(self, x, y, func):
+    if self._cache_lowering[l] is not None:
+      return self._cache_lowering[l]
 
-    A = self._raising_op_from_root_gen(k, l - 1)
-    k += 1
-    l -= 1
-    if l < k:
-      B = self.raising(k)
+    p = int(y + (x + y) * (x + y + 1) / 2)
+    
+    root_gen_idx_start = (self.dim_lie_algebra -
+                          self.num_root_generators)
+
+    if p > root_gen_idx_start:
+      p -= root_gen_idx_start
+      self._cache_lowering[p] = self._build_lowering_operator_entries(p)
     else:
-      B = self._raising_op_from_root_gen(k, l)
+      A = self.
 
-    return A*B - B*A
+      A*B - B*A
 
   def Y(self, k):
     """
@@ -74,33 +77,27 @@ cdef class Irrep(IrrepBase):
     ...
     Y_{N^2-2} = H_{N-1}
     """
-
     n = self.num_root_generators
+    comb = np.fromiter(chain.from_iterable(combinations(range(n), 2)),
+                                           int, n * (n - 1))
 
     if k < 2 * n:
-      # lin com lowering/raising
       odd = k % 2
       k = int(k / 2)
       if odd == 0:
-        return self.lowering(k)
-      else:
         return self.raising(k)
-    elif k < n * (n + 1):
-      k -= 2 * n
-      odd = k % 2
-      comb = np.fromiter(chain.from_iterable(combinations(range(n), 2)),
-                                             int, n * (n - 1))
-      # round k down to highest even valued element < k
-      b, a = comb[k - odd], comb[k - odd + 1]
-      if odd == 0:
-        return (self.lowering(a)*self.lowering(b) -
-                self.lowering(b)*self.lowering(a))
       else:
-        return (self.raising(a)*self.raising(b) -
-                self.raising(b)*self.raising(a))
-    elif k < self.dim_lie_algebra:
-      k -= n * (n + 1)
-      return self.cartan(k)
+        return self.lowering(k)
+    
+    k -= 2 * n
+    if k < len(comb):
+      odd = k % 2
+      k = int(k / 2)
+      if odd == 0:
+        return self._lr_from_root_gen(*comb[k], func=self.raising)
+      else:
+        return self.lowering(k)
+
 
   def X(self, k):
     """

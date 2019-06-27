@@ -40,9 +40,15 @@ Output:
 
 <p align="center"><img alt="\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \begin{pmatrix} 0 & i \\ -i & 0 \end{pmatrix},\ \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}" src="images/e89d0222b50b5ffd1c309b51bc20be51.svg" /></p>
 
-
-
 ### Mathematica
+
+```mathematica
+Needs["SUN`"]
+
+irrep = SUNLieIrrepDynkin[1,0]
+
+X = SUNLieMatrices[irrep, Method→RaisingBasis]
+```
 
 ## Planned features
 
