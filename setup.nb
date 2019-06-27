@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      9117,        277]
-NotebookOptionsPosition[      7594,        219]
-NotebookOutlinePosition[      7928,        234]
-CellTagsIndexPosition[      7885,        231]
+NotebookDataLength[      9253,        280]
+NotebookOptionsPosition[      7694,        221]
+NotebookOutlinePosition[      8028,        236]
+CellTagsIndexPosition[      7985,        233]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -35,7 +35,7 @@ The latter requires that a compiler is installed on your system. "
 }], "Text",
  InitializationCell->True,
  CellChangeTimes->{{3.769593370020213*^9, 3.769593600640668*^9}, {
-  3.769593753543119*^9, 3.7695937769395103`*^9}}],
+   3.769593753543119*^9, 3.7695937769395103`*^9}, 3.7706268666029167`*^9}],
 
 Cell[CellGroupData[{
 
@@ -82,6 +82,9 @@ Cell[BoxData[
 
 Cell["and then a simple", "Text",
  CellChangeTimes->{{3.7695939817135143`*^9, 3.769593993263569*^9}}],
+
+Cell[BoxData["s"], "Input",
+ CellChangeTimes->{3.7706269610213203`*^9}],
 
 Cell[BoxData[
  RowBox[{
@@ -172,9 +175,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{"SUNLieMatrix", "[", 
-  RowBox[{"\<\"D(1, 0)\"\>", ",", "1"}], "]"}]], "Output",
+  RowBox[{"irrep", ",", "1"}], "]"}]], "Output",
  CellChangeTimes->{{3.769595088039502*^9, 3.769595105758429*^9}, 
-   3.76959514708947*^9, 3.769595184605495*^9}]
+   3.76959514708947*^9, 3.769595184605495*^9, 3.7706269420691767`*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -194,12 +197,11 @@ Cell[BoxData[
 Cell[BoxData[
  RowBox[{"SUNIrrepDecompose", "[", 
   RowBox[{
-   RowBox[{"\<\"D(1, 0)\"\>", "\[TensorProduct]", "\<\"D(1, 0)\"\>"}], 
-   "\[CirclePlus]", 
-   RowBox[{"\<\"D(1, 0)\"\>", "\[TensorProduct]", "\<\"D(1, 0)\"\>"}]}], 
-  "]"}]], "Output",
+   RowBox[{"Null", "\[TensorProduct]", "Null"}], "\[CirclePlus]", 
+   RowBox[{"Null", "\[TensorProduct]", "Null"}]}], "]"}]], "Output",
  CellChangeTimes->{{3.769595256907736*^9, 3.769595269574458*^9}, {
-   3.7695953564827633`*^9, 3.7695953842833967`*^9}, 3.7695955291966057`*^9}]
+   3.7695953564827633`*^9, 3.7695953842833967`*^9}, 3.7695955291966057`*^9, 
+   3.770626944330217*^9}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -211,8 +213,8 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{"SUNCartanGenerator", "[", 
-  RowBox[{"\<\"D(1, 0)\"\>", ",", "1"}], "]"}]], "Output",
- CellChangeTimes->{3.769595832248604*^9}]
+  RowBox[{"irrep", ",", "1"}], "]"}]], "Output",
+ CellChangeTimes->{3.769595832248604*^9, 3.770626946723153*^9}]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
@@ -235,47 +237,48 @@ CellTagsIndex->{}
 Notebook[{
 Cell[CellGroupData[{
 Cell[580, 22, 111, 1, 65, "Section"],
-Cell[694, 25, 625, 12, 51, "Text",
+Cell[694, 25, 650, 12, 51, "Text",
  InitializationCell->True],
 Cell[CellGroupData[{
-Cell[1344, 41, 100, 1, 45, "Subsection"],
+Cell[1369, 41, 100, 1, 45, "Subsection"],
 Cell[CellGroupData[{
-Cell[1469, 46, 225, 3, 35, "Subsubsection"],
-Cell[1697, 51, 395, 9, 88, "Text"]
+Cell[1494, 46, 225, 3, 35, "Subsubsection"],
+Cell[1722, 51, 395, 9, 88, "Text"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2129, 65, 219, 3, 35, "Subsubsection"],
-Cell[2351, 70, 216, 4, 31, "Text"],
-Cell[2570, 76, 228, 4, 32, "Input"],
-Cell[2801, 82, 101, 1, 31, "Text"],
-Cell[2905, 85, 915, 20, 102, "Input"],
-Cell[3823, 107, 169, 2, 31, "Text"],
+Cell[2154, 65, 219, 3, 35, "Subsubsection"],
+Cell[2376, 70, 216, 4, 31, "Text"],
+Cell[2595, 76, 228, 4, 32, "Input"],
+Cell[2826, 82, 101, 1, 31, "Text"],
+Cell[2930, 85, 71, 1, 30, "Input"],
+Cell[3004, 88, 915, 20, 102, "Input"],
+Cell[3922, 110, 169, 2, 31, "Text"],
 Cell[CellGroupData[{
-Cell[4017, 113, 145, 2, 30, "Input"],
-Cell[4165, 117, 244, 3, 32, "Output"]
+Cell[4116, 116, 145, 2, 30, "Input"],
+Cell[4264, 120, 244, 3, 32, "Output"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4470, 127, 118, 1, 45, "Subsection"],
-Cell[4591, 130, 517, 10, 31, "Text"]
+Cell[4569, 130, 118, 1, 45, "Subsection"],
+Cell[4690, 133, 517, 10, 31, "Text"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5145, 145, 106, 1, 45, "Subsection"],
-Cell[5254, 148, 204, 3, 31, "Text"],
-Cell[5461, 153, 114, 2, 30, "Input"],
-Cell[5578, 157, 341, 6, 32, "Input"],
+Cell[5244, 148, 106, 1, 45, "Subsection"],
+Cell[5353, 151, 204, 3, 31, "Text"],
+Cell[5560, 156, 114, 2, 30, "Input"],
+Cell[5677, 160, 341, 6, 32, "Input"],
 Cell[CellGroupData[{
-Cell[5944, 167, 163, 3, 35, "Input"],
-Cell[6110, 172, 216, 4, 32, "Output"]
+Cell[6043, 170, 163, 3, 35, "Input"],
+Cell[6209, 175, 230, 4, 32, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6363, 181, 442, 10, 35, "Input"],
-Cell[6808, 193, 391, 8, 32, "Output"]
+Cell[6476, 184, 442, 10, 35, "Input"],
+Cell[6921, 196, 366, 7, 32, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[7236, 206, 164, 3, 35, "Input"],
-Cell[7403, 211, 151, 3, 32, "Output"]
+Cell[7324, 208, 164, 3, 35, "Input"],
+Cell[7491, 213, 163, 3, 32, "Output"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

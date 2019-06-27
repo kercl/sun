@@ -152,7 +152,7 @@ cdef class IrrepBase:
     self._gt_basis.num_patterns = 0
 
     self._cache_cartan = [None] * self.dim_csa
-    self._cache_lowering = [None] * self.dim_csa * (self.dim_csa + 1) / 2
+    self._cache_lowering = [None] * int(self.dim_csa * (self.dim_csa + 1) // 2)
 
   def _build_cartan_diagonal(self, l):
     if self._gt_basis.num_patterns == 0:

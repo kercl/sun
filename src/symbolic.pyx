@@ -26,32 +26,36 @@ cdef class Irrep(IrrepBase):
 
     return self._cache_cartan[l]
 
-  def _root_lowering(self, l):
-    if self._cache_lowering[l] is None:
-      entries = self._build_lowering_operator_entries(l)
-      self._cache_lowering[l] = self._coord_sparse(entries)
+  def _pq_to_l(self, p, q):
+    return int(p*(p + 1) // 2 + q)
 
-    return self._cache_lowering[l]
+  def _lowering(self, p, q):
+    if p < q:
+      raise KeyError(f"Unallowed configuration: p < q.")
 
-  def _root_raising(self, l):
-    return self.lowering(l).adjoint()
+    l = self._pq_to_l(p, q)
 
-  def _lowering(self, x, y, func):
+    if p == q:
+      if self._cache_lowering[l] is None:
+        entries = self._build_lowering_operator_entries(p)
+        self._cache_lowering[l] = self._coord_sparse(entries)
+      return self._cache_lowering[l]
+
     if self._cache_lowering[l] is not None:
       return self._cache_lowering[l]
 
-    p = int(y + (x + y) * (x + y + 1) / 2)
-    
-    root_gen_idx_start = (self.dim_lie_algebra -
-                          self.num_root_generators)
+    A = self._lowering(q, q)
+    for k in range(q + 1, p + 1):
+      B = self._lowering(k, k)
+      A = B*A - A*B
 
-    if p > root_gen_idx_start:
-      p -= root_gen_idx_start
-      self._cache_lowering[p] = self._build_lowering_operator_entries(p)
-    else:
-      A = self.
+    self._cache_lowering[l] = A
+    return A
 
-      A*B - B*A
+  def _raising(self, p, q):
+    if p > q:
+      raise KeyError(f"Unallowed configuration: p > q.")
+    return self._lowering(q, p).adjoint()
 
   def Y(self, k):
     """
@@ -59,23 +63,9 @@ cdef class Irrep(IrrepBase):
     the form:
 
     Let L_i, R_i be the ith lowering and raising
-    operators, H_i the ith cartan generator and
-    N the number of root generators.
-    Then:
+    operators.
 
-    Y_0 = L_0
-    Y_1 = R_0
-    ...
-    Y_{2N-2} = L_{N-1}
-    Y_{2N-1} = R_{N-1}
-    Y_{2N} = [L_0, L_1]
-    Y_{2N} = [R_0, R_1]
-    ...
-    Y_{N(N-1)-2} = [L_{N-2}, L_{N-1}]
-    Y_{N(N-1)-1} = [R_{N-2}, R_{N-1}]
-    Y_{N(N-1)} = H_0
-    ...
-    Y_{N^2-2} = H_{N-1}
+    TODO: documentation
     """
     n = self.num_root_generators
     comb = np.fromiter(chain.from_iterable(combinations(range(n), 2)),
