@@ -10,5 +10,6 @@ cdef class IrrepBase:
     cdef gt_tree _gt_basis
     cdef list _cache_cartan
     cdef list _cache_lowering
+    cdef object _i
 
     cdef _construct_gt_basis(self)

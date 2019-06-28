@@ -26,6 +26,19 @@ cdef extern from "irrep.h":
                                    size_t **row,
                                    size_t **col)
 
+
+def _l_to_pq(l):
+    w = np.floor((np.sqrt(8 * l + 1) - 1) / 2)
+    t = w * (w + 1) / 2
+    y = l - t
+    x = w - y
+    return int(y + x), int(y)
+
+
+def _pq_to_l(p, q):
+  return int(p*(p + 1) // 2 + q)
+
+
 cdef class IrrepBase:
   """
   Base class for irreducible representations
@@ -154,6 +167,8 @@ cdef class IrrepBase:
     self._cache_cartan = [None] * self.dim_csa
     self._cache_lowering = [None] * int(self.dim_csa * (self.dim_csa + 1) // 2)
 
+    self._i = None
+
   def _build_cartan_diagonal(self, l):
     if self._gt_basis.num_patterns == 0:
       self._construct_gt_basis()
@@ -184,10 +199,9 @@ cdef class IrrepBase:
                                             &numerators, &denominators,
                                             &rows, &cols)
 
-    narr = np.ndarray(shape=(num_entries, 4), dtype=np.dtype("i"))
-    cdef int [:, :] narr_view = narr
-
-    for i in range(num_entries):
+    narr = np.ndarray(shape=(num_entries, 4), dtype=np.int64)
+    cdef long [:, :] narr_view = narr
+    for i in range(num_entries): # TODO: for larger representation, this loop causes segfault
       narr_view[i, 0] = rows[i]
       narr_view[i, 1] = cols[i]
       narr_view[i, 2] = numerators[i]
@@ -199,6 +213,86 @@ cdef class IrrepBase:
     free(cols)
 
     return narr
+
+  def _cartan(self, l):
+    return 0
+
+  def cartan(self, l):
+    if self._cache_cartan[l] is None:
+      self._cache_cartan[l] = self._cartan(l)
+
+    return self._cache_cartan[l]
+
+  def _lowering_root(self, p):
+    return 0
+
+  def _lowering(self, p, q):
+    if p < q:
+      raise KeyError(f"Unallowed configuration: p < q.")
+
+    l = _pq_to_l(p, q)
+
+    if p == q:
+      if self._cache_lowering[l] is None:
+        self._cache_lowering[l] = self._lowering_root(p)
+      return self._cache_lowering[l]
+
+    if self._cache_lowering[l] is not None:
+      return self._cache_lowering[l]
+
+    A = self._lowering(q, q)
+    for k in range(q + 1, p + 1):
+      B = self._lowering(k, k)
+      A = B*A - A*B
+
+    self._cache_lowering[l] = A
+    return A
+
+  def _raising(self, p, q):
+    if p > q:
+      raise KeyError(f"Unallowed configuration: p > q.")
+    return self._lowering(q, p).adjoint()
+
+  def y(self, l):
+    """
+    Generate a basis for the the Lie algebra of
+    the form: 
+
+    Let L_i, R_i be the ith lowering and raising
+    operators.
+
+    TODO: documentation
+    """
+
+    n = self.num_root_generators
+    if l >= n * (n + 1):
+      return self.cartan(l - n * (n + 1))
+
+    if l % 2 == 0:
+      return self._lowering(*_l_to_pq(l // 2)).adjoint()
+    return self._lowering(*_l_to_pq((l - 1) // 2))
+
+  def x(self, k):
+    """
+    Given the basis Y, compute:
+
+    X[0] = (Y[0] + ajoint(Y[0])) / 2
+    X[1] = (Y[1] - ajoint(Y[1])) / 2
+    ...
+    """
+
+    n = self.num_root_generators
+
+    if k < n * (n + 1):
+      odd = k % 2
+
+      Y = self.y(k - odd)
+      if odd == 0:
+        return (Y + Y.adjoint()) / 2
+      else:
+        return (Y - Y.adjoint()) / (2 * self._i)
+    else:
+      return self.y(k)
 
   def drop_basis(self):
     if self._gt_basis.num_patterns > 0:
