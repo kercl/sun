@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <limits.h>
 
-typedef int16_t gt_int_t;
+typedef short gt_int_t;
 
 #define GT_INT_MAX 0x7FFF
 #define GT_INT_MIN -0x7FFF

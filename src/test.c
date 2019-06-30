@@ -26,6 +26,7 @@
 
 #include "int_gt.h"
 #include "irrep.h"
+#include "keylist.h"
 
 int _array_increment_by_limits(gt_int_t *arr,
                                size_t length,
@@ -47,7 +48,7 @@ void print_pattern_raligned(gt_int_t *pattern, size_t length) {
     }
 }
 
-void print_pattern_flattened(int *pattern, size_t length) {
+void print_pattern_flattened(gt_int_t *pattern, size_t length) {
     for (int i = 0; i < (length*(length + 1)) >> 1; ++i) {
         printf("%2d ", pattern[i]);
     }
@@ -175,6 +176,30 @@ void test_gt_generate_all_transposed_2() {
     gt_free_tree(&tree, 1);
 }
 
+void test_gt_generate_all_transposed_3() {
+    gt_int_t toprow[] = {1, 0};
+    size_t length = 2;
+
+    gt_int_t *patterns;
+    size_t n_entries;
+
+    assert(gt_num_of_patterns(toprow, length) == 2);
+
+    gt_generate_all(&patterns, &n_entries, toprow, length);
+    struct gt_tree tree;
+    gt_list_to_tree(&tree, patterns, n_entries, length);
+
+    int m = length * (length + 1) >> 1;
+
+    for (int i = 0; i < n_entries; ++i) {
+        assert(i == gt_locate_in_tree(&tree, patterns + i * m));
+        print_pattern_raligned(patterns + i * m, length);
+    }
+    assert(n_entries == 2);
+
+    gt_free_tree(&tree, 1);
+}
+
 void test_dimension_from_dynkin() {
     gt_int_t dynkin_1[] = {1},
              dynkin_2[] = {1, 1},
@@ -187,12 +212,46 @@ void test_dimension_from_dynkin() {
     assert(dimension_from_dynkin(dynkin_4, 3) == 4);
 }
 
+void test_key_list() {
+    struct key_list_node *list = NULL;
+
+    float data[] = {
+        1.1, 5.2, 7.2, 1.7, 2.8, 9.2, 6.3, 7.3, 3.0, 2.1
+    };
+
+    for(int i = 0; i < 10; i++) {
+        list = kl_push(list, i, &data[i]);
+    }
+
+    for(struct key_list_node *it = list; it != NULL; it = it->next) {
+        printf("%d: %f\n", it->key, *(float*)it->data);
+    }
+
+    float *data_ptr;
+    int err = kl_find(list, 6, (void**)&data_ptr);
+    printf("Found(%d) 6: %f\n", err, *data_ptr);
+
+    err = kl_find(list, 17, (void**)&data_ptr);
+    printf("No data at 17: %d\n", err);
+
+    list = kl_unlink(list, 0, (void**)&data_ptr);
+    list = kl_unlink(list, 3, (void**)&data_ptr);
+    list = kl_unlink(list, 7, (void**)&data_ptr);
+    list = kl_unlink(list, 9, (void**)&data_ptr);
+
+    for(struct key_list_node *it = list; it != NULL; it = it->next) {
+        printf("%d: %f\n", it->key, *(float*)it->data);
+    }
+}
+
 int main(int argc, char **argv) {
     test__array_increment_by_limits();
     test_gt_allocate_min_int_pattern();
     test_gt_transpose();
     test_gt_generate_all_transposed_2();
+    test_gt_generate_all_transposed_3();
     test_dimension_from_dynkin();
+    test_key_list();
 
     /*gt_int_t toprow[] = {2, 1, 0};
     size_t length = sizeof(toprow) / sizeof(gt_int_t);

@@ -22,6 +22,7 @@
 #include "irrep.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 
 #define SIGN(x) ((x) < 0 ? -1: 1)
@@ -95,6 +96,11 @@ lowering_operator_from_gt(struct gt_tree *patterns,
     int M_lk, M_lkp;
     for (size_t M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
         for (size_t k = 0; k < row_len; k++) {
+            // if pattern has at lowering position already 0
+            // as entry, the resulting pattern cannot exist
+            if(pattern_array[M + row_start + k] == 0)
+                continue;
+
             // decrement pattern M -> M - M^{k,l}
             pattern_array[M + row_start + k]--;
             Mj = gt_locate_in_tree(patterns, pattern_array + M);
@@ -134,15 +140,15 @@ lowering_operator_from_gt(struct gt_tree *patterns,
                 array_sizes += num_patterns;
                 numerators = realloc(numerators, sizeof(mat_int_t) * array_sizes);
                 denominators = realloc(denominators, sizeof(mat_int_t) * array_sizes);
-                row = realloc(row, sizeof(mat_int_t) * array_sizes);
-                col = realloc(col, sizeof(mat_int_t) * array_sizes);
+                row = realloc(row, sizeof(size_t) * array_sizes);
+                col = realloc(col, sizeof(size_t) * array_sizes);
             }
         }
     }
     *ptr_numerators = realloc(numerators, sizeof(mat_int_t) * entry_counter);
     *ptr_denominators = realloc(denominators, sizeof(mat_int_t) * entry_counter);
-    *ptr_row = realloc(row, sizeof(mat_int_t) * entry_counter);
-    *ptr_col = realloc(col, sizeof(mat_int_t) * entry_counter);
+    *ptr_row = realloc(row, sizeof(size_t) * entry_counter);
+    *ptr_col = realloc(col, sizeof(size_t) * entry_counter);
 
     return entry_counter;
 }

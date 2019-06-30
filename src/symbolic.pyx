@@ -8,9 +8,9 @@ from sun.core cimport IrrepBase
 
 cdef class Irrep(IrrepBase):
   """
-  Stores the values in numpy resp. scipy arrays
+  Stores the values in sympy SparseMatrix
   """
-  
+
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
     self._i = I
@@ -30,6 +30,23 @@ cdef class Irrep(IrrepBase):
   def _lowering_root(self, p):
     entries = self._build_lowering_operator_entries(p)
     return self._coord_sparse(entries)
+
+  def _raising(self, p, q):
+    return self._lowering(p, q).adjoint()
+
+
+cdef class SU2(Irrep):
+  """
+  SU(2) representations
+  """
+
+  def __init__(self, j):
+    super().__init__(dykin=[<int>j])
+
+  @classmethod
+  def pauli(cls):
+    irrep = cls(1)
+
 
 class LieAlgebra:
   """

@@ -4,6 +4,7 @@ __pycache__
 *.ipynb
 sun_old.py
 test_int_gt
+test.nb
 build
 *.so
 *.sh

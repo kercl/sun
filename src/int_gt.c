@@ -152,7 +152,9 @@ _gt_increment_transposed(gt_int_t *pattern_tr,
 
         if (carry) {
             if (i < m - 1)
-                memcpy(pattern_tr, min_pattern_tr, offset + length - i);
+                memcpy(pattern_tr, 
+                       min_pattern_tr, 
+                       sizeof(gt_int_t) * (offset + length - i));
             else
                 return 0;
         } else {
@@ -163,7 +165,7 @@ _gt_increment_transposed(gt_int_t *pattern_tr,
 }
 
 size_t
-_gcd_positive(size_t x, size_t y) {
+_abs_gcd(size_t x, size_t y) {
   size_t c;
   while (y != 0) {
     c = x % y;
@@ -191,7 +193,7 @@ gt_num_of_patterns(gt_int_t *toprow, size_t length) {
             num *= factor + i;
             denom *= i;
 
-            red_factor = _gcd_positive(num, denom);
+            red_factor = _abs_gcd(num, denom);
             num /= red_factor;
             denom /= red_factor;
         }
@@ -335,4 +337,5 @@ gt_free_tree(struct gt_tree *tree, int free_array) {
     _free_node(tree->array_representation, 0, tree->length - 1, &tree->root);
     if(free_array)
         free(tree->array_representation);
+    tree->num_patterns = 0;
 }

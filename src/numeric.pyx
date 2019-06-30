@@ -1,4 +1,5 @@
-from scipy.sparse import dia_matrix
+from scipy.sparse import dia_matrix, coo_matrix
+import numpy as np
 
 from sun.core cimport IrrepBase
 
@@ -7,12 +8,21 @@ cdef class Irrep(IrrepBase):
   Stores the values in numpy resp. scipy arrays
   """
 
-  def cartan(self, l):
-    if self._cache_cartan[l] is None:
-      diag = self._build_cartan_diagonal(l).astype("f") / 2.0
-      self._cache_cartan[l] = dia_matrix((diag, 0), shape=(self.dim, self.dim))
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    self._i = 1j
 
-    return self._cache_cartan[l]
+  def _cartan(self, l):
+    diag = self._build_cartan_diagonal(l).astype("f") / 2.0
+    return dia_matrix((diag, 0), shape=(self.dim, self.dim))
+
+  def _lowering_root(self, p):
+    r, c, n, d = self._build_lowering_operator_entries(p).T
+    return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+
+  def _raising(self, p, q):
+    return self._lowering(p, q).H
+
 
 cdef class SU2(Irrep):
   """

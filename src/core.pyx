@@ -201,7 +201,7 @@ cdef class IrrepBase:
 
     narr = np.ndarray(shape=(num_entries, 4), dtype=np.int64)
     cdef long [:, :] narr_view = narr
-    for i in range(num_entries): # TODO: for larger representation, this loop causes segfault
+    for i in range(num_entries):
       narr_view[i, 0] = rows[i]
       narr_view[i, 1] = cols[i]
       narr_view[i, 2] = numerators[i]
@@ -215,7 +215,7 @@ cdef class IrrepBase:
     return narr
 
   def _cartan(self, l):
-    return 0
+    raise NotImplementedError("_cartan not implemented in IrrepBase")
 
   def cartan(self, l):
     if self._cache_cartan[l] is None:
@@ -224,7 +224,7 @@ cdef class IrrepBase:
     return self._cache_cartan[l]
 
   def _lowering_root(self, p):
-    return 0
+    raise NotImplementedError("_lowering_root not implemented in IrrepBase")
 
   def _lowering(self, p, q):
     if p < q:
@@ -249,9 +249,7 @@ cdef class IrrepBase:
     return A
 
   def _raising(self, p, q):
-    if p > q:
-      raise KeyError(f"Unallowed configuration: p > q.")
-    return self._lowering(q, p).adjoint()
+    raise NotImplementedError("_raising not implemented in IrrepBase")
 
   def y(self, l):
     """
@@ -269,7 +267,7 @@ cdef class IrrepBase:
       return self.cartan(l - n * (n + 1))
 
     if l % 2 == 0:
-      return self._lowering(*_l_to_pq(l // 2)).adjoint()
+      return self._raising(*_l_to_pq(l // 2))
     return self._lowering(*_l_to_pq((l - 1) // 2))
 
   def x(self, k):
@@ -286,11 +284,12 @@ cdef class IrrepBase:
     if k < n * (n + 1):
       odd = k % 2
 
-      Y = self.y(k - odd)
+      Y1 = self.y(k - odd)
+      Y2 = self.y(k - odd + 1)
       if odd == 0:
-        return (Y + Y.adjoint()) / 2
+        return (Y1 + Y2) / 2
       else:
-        return (Y - Y.adjoint()) / (2 * self._i)
+        return (Y1 - Y2) / (2 * self._i)
     else:
       return self.y(k)
 
