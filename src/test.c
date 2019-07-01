@@ -244,6 +244,25 @@ void test_key_list() {
     }
 }
 
+void test_cartan() {
+    gt_int_t toprow[] = {2, 1, 0};
+    int length = 3;
+
+    gt_int_t *patterns;
+    size_t n_entries;
+
+    gt_generate_all(&patterns, &n_entries, toprow, length);
+    struct gt_tree tree;
+    gt_list_to_tree(&tree, patterns, n_entries, length);
+
+    mat_int_t *diagonal = malloc(sizeof(mat_int_t) * tree.num_patterns);
+    csa_generator_diag_from_gt(&tree, 1, diagonal);
+    csa_generator_diag_from_gt(&tree, 2, diagonal);
+
+    free(diagonal);
+    gt_free_tree(&tree, 1);
+}
+
 int main(int argc, char **argv) {
     test__array_increment_by_limits();
     test_gt_allocate_min_int_pattern();
@@ -252,6 +271,7 @@ int main(int argc, char **argv) {
     test_gt_generate_all_transposed_3();
     test_dimension_from_dynkin();
     test_key_list();
+    test_cartan();
 
     /*gt_int_t toprow[] = {2, 1, 0};
     size_t length = sizeof(toprow) / sizeof(gt_int_t);

@@ -53,7 +53,7 @@ csa_generator_diag_from_gt(struct gt_tree *patterns,
 
     for (size_t M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
         diagonal[Mi] = 0;
-        for (size_t j = 0; j < row_len; j++) {
+        for (size_t j = 0; j <= row_len; j++) {
             if (j < row_len) {
                 // sum over row l
                 diagonal[Mi] -=

@@ -1,8 +1,8 @@
-# <sub><img alt="SU(n)" src="images/a9aa0eebca08632942699db706325eb8.svg" /></sub> Toolkit
+# $\mathfrak{su}(n)$ Toolkit
 
-This software package aims to provide several tools for working with representations of the spection unitary group <sub><sub><img alt="SU(n)" src="images/d0203de77fa58f64279192e742af1548.svg" /></sub></sub> and its Lie-algreba <sub><sub><img alt="\mathfrak{su}(n)" src="images/c6cc9a8850361dbf2f4bf51765b8a92d.svg" /></sub></sub>.
+This software package aims to provide several tools for working with representations of the Lie-algebras $\mathfrak{su}(n)$.
 
-The core library is written in C for efficiency and has python binding for both numpy and sympy as well as Mathematica.
+The core library is written in C for efficiency and has bindings for numpy, sympy and Mathematica.
 
 ## Setup
 
@@ -34,9 +34,9 @@ This does not yet generate the matrices. However once we iterate over `irrep` or
 ```python
 irrep.construct_matrices()
 for X in irrep:
-    print(X, end=" ")
+    print(2 * X, end=" ")
 ```
-Output: 
+Output:
 
 <p align="center"><img alt="\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \begin{pmatrix} 0 & i \\ -i & 0 \end{pmatrix},\ \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}" src="images/e89d0222b50b5ffd1c309b51bc20be51.svg" /></p>
 
@@ -45,7 +45,7 @@ Output:
 ```mathematica
 Needs["SUN`"]
 
-irrep = SUNLieIrrepDynkin[1,0]
+irrep = Irrep[1,0]
 
 X = SUNLieMatrices[irrep, Method→RaisingBasis]
 ```
@@ -54,7 +54,7 @@ X = SUNLieMatrices[irrep, Method→RaisingBasis]
 
 - [x] Generate irreducible representations from Dynkin labels
 - [x] Python bindings
-- [ ] Mathematica bindings
+- [x] Mathematica bindings
 - [ ] Decompose tensor products into irreducible representations
-- [ ] Matrix exponentials
-- [ ] Pedagogical tools for visualizations
+
+
