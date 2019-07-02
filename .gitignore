@@ -6,6 +6,7 @@ sun_old.py
 test_int_gt
 test.nb
 build
+deprecated
 *.so
 *.sh
 /sun

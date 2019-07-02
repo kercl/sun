@@ -97,7 +97,7 @@ Begin["Private`"];
 		RootLowering=LibraryFunctionLoad[sunLibCore,"ml_root_lowering",{Integer,Integer}, {Integer,_}]
 	},
 		matrices=Table[
-			{Transpose[#[[3;;]]]->#[[1]]/#[[2]]}&@RootLowering[basis,l],
+			{Transpose[#[[3;;]]]->Sqrt[-#[[1]]/#[[2]]]}&@RootLowering[basis,l],
 			{l,Length@topRow-1}];
 		SparseArray[#,{dim,dim}]&/@matrices
 	];
@@ -145,7 +145,7 @@ Begin["Private`"];
 		res
 	},
 		res = Join[Flatten[Table[{
-			(Y[i]+Y[i+1])/2, (Y[i]-Y[i+1])/(2I)
+			(Y[i]-Y[i+1])/(2I), (Y[i]+Y[i+1])/2
 		},
 		{i, 1, Length[Y]-Length[dynkin], 2}],1], Y[Length[Y]-Length[dynkin]+1;;]];
 		IrrepBasis[res, dynkin]
