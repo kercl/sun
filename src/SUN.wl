@@ -139,7 +139,7 @@ Begin["Private`"];
 	Options[LieAlgebraBasisMatrices]={BasisType->"AngularMomentum"};
 	LieAlgebraBasisMatrices[irrep_Irrep, OptionsPattern[]]:=Switch[OptionValue[BasisType],
 		"AngularMomentum", IrrepAngMomBasisMatrices[irrep],
-		"RaisingLowering", IrrepRLBasisMatrices[irrep]
+		"LoweringRaising", IrrepRLBasisMatrices[irrep]
 	];
 
 	Options[SU3BasisMatrices]={BasisType->"GellMann"};

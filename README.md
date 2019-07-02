@@ -1,6 +1,6 @@
-# $\mathfrak{su}(n)$ Toolkit
+# <sub><img alt="\mathfrak{su}(n)" src="images/2bf3d6de24840e5a4c9e0b01ba309000.svg" /></sub> Toolkit
 
-This software package aims to provide several tools for working with representations of the Lie-algebras $\mathfrak{su}(n)$.
+This software package aims to provide several tools for working with representations of the Lie-algebras <sub><sub><img alt="\mathfrak{su}(n)" src="images/c6cc9a8850361dbf2f4bf51765b8a92d.svg" /></sub></sub>.
 
 The core library is written in C for efficiency and has bindings for numpy, sympy and Mathematica.
 
@@ -20,35 +20,26 @@ Irreducibe matrix representations based on a given Dynkin labels can easily be g
 ```python
 import sun.numeric as sun
 
-irrep = sun.Irrep(dynkin=[1])
-irrep
+irrep = sun.Irrep(dynkin=[3,8])
+irrep.x(i)
 ```
-Output: 
-
-<p align="center"><img alt="D(1)" src="images/ad0777e189b4b22f46807d3878e4e72c.svg" /></p>
-
-
-
-This does not yet generate the matrices. However once we iterate over `irrep` or access an element throught `__getitem__` the matrices are built and stored within the object. The construction can also manually invoked through the function `construct_matrices`.
-
-```python
-irrep.construct_matrices()
-for X in irrep:
-    print(2 * X, end=" ")
-```
-Output:
-
-<p align="center"><img alt="\begin{pmatrix} 0 & 1 \\ 1 & 0 \end{pmatrix},\ \begin{pmatrix} 0 & i \\ -i & 0 \end{pmatrix},\ \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}" src="images/e89d0222b50b5ffd1c309b51bc20be51.svg" /></p>
 
 ### Mathematica
 
 ```mathematica
 Needs["SUN`"]
 
-irrep = Irrep[1,0]
+irrep = Irrep[5,2,1]
 
-X = SUNLieMatrices[irrep, Method→RaisingBasis]
+X = LieAlgebraBasisMatrices[irrep, BasisType→"LoweringRaising"]
+X[i]
 ```
+
+## Algorithm
+
+The package is an implementation of the algorithm outlined in [1].
+
+[1] Alex, Arne, et al. "A numerical algorithm for the explicit calculation of SU(N) and SL(N, C) Clebsch–Gordan coefficients." *Journal of Mathematical Physics* 52.2 (2011): 023507.
 
 ## Planned features
 
@@ -56,5 +47,3 @@ X = SUNLieMatrices[irrep, Method→RaisingBasis]
 - [x] Python bindings
 - [x] Mathematica bindings
 - [ ] Decompose tensor products into irreducible representations
-
-
