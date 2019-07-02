@@ -144,6 +144,7 @@ Begin["Private`"];
 
 	Options[SU3BasisMatrices]={BasisType->"GellMann"};
 	SU3BasisMatrices[p_, q_, OptionsPattern[]] := Module[{
+		coords,
 		X=If[OptionValue[BasisType]=="GellMann",
 			 LieAlgebraBasisMatrices@Irrep[p, q],
 			 LieAlgebraBasisMatrices[Irrep[p, q], BasisType->OptionValue[BasisType]]]
