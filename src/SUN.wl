@@ -15,66 +15,73 @@ BeginPackage["SUN`"];
 		"Generate set of basis matrices spanning the particular representation";
 	
 	IrrepDynkinLabel::usage = 
-		"Get the Dynkin label of an irreducible representation.";
+		"Retrieve the Dynkin label of an irreducible representation.";
 	
 	SU3BasisMatrices::usage =
-		"Get \[GothicS]\[GothicU](3) Irrep basis";
+		"Construct \[GothicS]\[GothicU](3) Irrep basis";
 	
 	SU2BasisMatrices::usage =
-		"Get \[GothicS]\[GothicU](2) Irrep basis";
+		"Construct \[GothicS]\[GothicU](2) Irrep basis";
 	
 Begin["Private`"];
 	sunLibCore = FindLibrary["sun_core"];
+	
+	(* Icon used in the summary boxes *)
+	iconSize = Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}];
+	icon = Graphics[({{PointSize[Medium],Point@#},Line@#}&@{
+						{1,0},        {1/2,2/Sqrt[3]}, {-(1/2),2/Sqrt[3]},
+						{-1,0}, {-(1/2),-(2/Sqrt[3])}, {1/2,-(2/Sqrt[3])},{1,0}})
+					~Join~{
+						Line[{{-1,0},{1,0}}],
+						Line[{{1/2,2/Sqrt[3]},{-(1/2),-(2/Sqrt[3])}}],
+						Line[{{1/2,-(2/Sqrt[3])},{-(1/2),2/Sqrt[3]}}]},
+					AspectRatio->1,
+					ImageSize -> iconSize];
 
+	(* SummaryBox identifying an irreducible representation by its Dynkin Label *)
 	Irrep/:MakeBoxes[
 		Irrep[dynkin__Integer],form:(StandardForm|TraditionalForm)]:=Module[
-			{above = {{BoxForm`SummaryItem[{
-					   "\[GothicS]\[GothicU]("<>ToString[Length@List@dynkin + 1]<>") Irrep: ", 
-					   "D("<>StringRiffle[List@dynkin,","]<>")"}]},
-					  {BoxForm`SummaryItem[{"Dimension Irrep: ", IrrepDimensionDynkin[List@dynkin]}]}},
-			 below = {{BoxForm`SummaryItem[{"Dimension Lie Algebra: ", (Length[List@dynkin]+1)^2-1}]}},
-			 icon = Graphics[({{PointSize[Medium],Point@#},Line@#}&@{{1,0},{1/2,2/Sqrt[3]},{-(1/2),2/Sqrt[3]},{-1,0},{-(1/2),-(2/Sqrt[3])},{1/2,-(2/Sqrt[3])},{1,0}})~Join~{
-					  Line[{{-1,0},{1,0}}],Line[{{1/2,2/Sqrt[3]},{-(1/2),-(2/Sqrt[3])}}],Line[{{1/2,-(2/Sqrt[3])},{-(1/2),2/Sqrt[3]}}]},
-					  AspectRatio->1, ImageSize -> Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}]]
-
+			{above={{BoxForm`SummaryItem[{
+					 "\[GothicS]\[GothicU]("<>ToString[Length@List@dynkin + 1]<>") Irrep: ", 
+					 "D("<>StringRiffle[List@dynkin,","]<>")"}]},
+					{BoxForm`SummaryItem[{"Dimension Irrep: ", IrrepDimensionDynkin[List@dynkin]}]}},
+			 below={{BoxForm`SummaryItem[{"Dimension Lie Algebra: ", (Length[List@dynkin]+1)^2-1}]}},
+			 icon=icon
 			},
 			BoxForm`ArrangeSummaryBox[
-				Irrep,(*head*)
-				List[dynkin],(*interpretation*)
-				icon,(*icon,use None if not needed*)
-				above,(*always shown content*)
-				below,(*expandable content*)
-				form,
-				"Interpretable"->True]];
+				Irrep,
+				List[dynkin],
+				icon, above, below,
+				form, "Interpretable"->True]];
 
+	(* SummaryBox identifying a set of basis matrices for a particular irreducible representation *)
 	IrrepBasis/:MakeBoxes[
 		IrrepBasis[matrices_List, dynkin_List],form:(StandardForm|TraditionalForm)]:=Module[
-			{above = {{BoxForm`SummaryItem[{
-					   "\[GothicS]\[GothicU]("<>ToString[Length@dynkin + 1]<>") representation basis: ", 
-					   "D("<>StringRiffle[dynkin,","]<>")"}]},
-					  {BoxForm`SummaryItem[{"Dimension Irrep: ", IrrepDimensionDynkin[dynkin]}]}},
-			 below = {},
-			 icon = Graphics[({{PointSize[Medium],Point@#},Line@#}&@{{1,0},{1/2,2/Sqrt[3]},{-(1/2),2/Sqrt[3]},{-1,0},{-(1/2),-(2/Sqrt[3])},{1/2,-(2/Sqrt[3])},{1,0}})~Join~{
-					  Line[{{-1,0},{1,0}}],Line[{{1/2,2/Sqrt[3]},{-(1/2),-(2/Sqrt[3])}}],Line[{{1/2,-(2/Sqrt[3])},{-(1/2),2/Sqrt[3]}}]},
-					  AspectRatio->1, ImageSize -> Dynamic[{Automatic, 3.5 CurrentValue["FontCapHeight"]/AbsoluteCurrentValue[Magnification]}]]
-
+			{above={{BoxForm`SummaryItem[{
+					 "\[GothicS]\[GothicU]("<>ToString[Length@dynkin + 1]<>") representation basis: ", 
+					 "D("<>StringRiffle[dynkin,","]<>")"}]},
+					{BoxForm`SummaryItem[{"Dimension Irrep: ", IrrepDimensionDynkin[dynkin]}]}},
+			 below={},
+			 icon=icon
 			},
 			BoxForm`ArrangeSummaryBox[
-				IrrepBasis,(*head*)
-				matrices,(*interpretation*)
-				icon,(*icon,use None if not needed*)
-				above,(*always shown content*)
-				below,(*expandable content*)
-				form,
-				"Interpretable"->True]];
+				IrrepBasis,
+				matrices,
+				icon, above, below,
+				form, "Interpretable"->True]];
 
+	(* Return the Dynkin label for an irreducible representation *)
+	IrrepDynkinLabel[Irrep[dynkin__Integer]]:=List@dynkin;
+
+	(* Adding functionality to IrrepBasis:
+		The elements should be indexable
+		Length should give the number of basis elements *)
 	IrrepBasis[matrices_List, dynkin_List][k_] := matrices[[k]];
 	Unprotect[Length];
 	Length[IrrepBasis[matrices_List, dynkin_List]] := Length[matrices];
 	Protect[Length];
 
-	IrrepDynkinLabel[Irrep[dynkin__Integer]]:=List@dynkin;
-
+	(* Return the dimension of the vector space of the representation *)
 	IrrepDimensionDynkin[irrep_List] := Module[{
 		topRow=Append[Reverse@Accumulate@Reverse@irrep, 0], 
 		DimIrrep=LibraryFunctionLoad[sunLibCore,"ml_dimension_irrep",{{Integer,1}},Integer]
@@ -84,6 +91,7 @@ Begin["Private`"];
 
 	IrrepDimension[irrep_Irrep] := IrrepDimensionDynkin[IrrepDynkinLabel[irrep]];
 
+	(* Construct root generators *)
 	IrrepBuildLoweringRootOperators[topRow_List, basis_, dim_]:=Module[{
 		matrices={}, bID,
 		RootLowering=LibraryFunctionLoad[sunLibCore,"ml_root_lowering",{Integer,Integer}, {Integer,_}]
@@ -94,12 +102,18 @@ Begin["Private`"];
 		SparseArray[#,{dim,dim}]&/@matrices
 	];
 	
+	(* Helper function mapping \[DoubleStruckCapitalN]\[Rule]\[DoubleStruckCapitalN]^2 (see pairing function) *)
 	LToPQ[l_]:=Module[{
 		w=Floor[(Sqrt[8l+1]-1)/2], t},
 		t = (w(w+1))/2;
 		{l-t+1, w+1}
 	];		
 
+	(* Assuming Subscript[L, i] and Subscript[R, i] are the lowering and  raising operators
+		generated by the root generators through repeated commutation
+		and taking the adjoint and Subscript[C, i] the Cartan generators, this basis
+		looks like 
+		Subscript[L, 1], Subscript[R, 1], Subscript[L, 2], Subscript[R, 2] ... Subscript[L, n(n-1)/2], Subscript[R, n(n-1)/2], Subscript[C, 1], ... , Subscript[C, n-1] *)
 	IrrepRLBasisMatrices[irrep_Irrep] := Module[{
 		topRow=Append[Reverse@Accumulate@Reverse@IrrepDynkinLabel[irrep], 0],
 		dim=IrrepDimension[irrep],
@@ -124,6 +138,7 @@ Begin["Private`"];
 		IrrepBasis[res, IrrepDynkinLabel[irrep]]
 	];
 
+	(* Based on the RL basis, compute (Subscript[Y, k]+Subscript[Y, k+1])/2 and (Subscript[Y, k]-Subscript[Y, k+1])/(2i) *)
 	IrrepAngMomBasisMatrices[irrep_Irrep] := Module[{
 		Y=IrrepRLBasisMatrices[irrep],
 		dynkin=IrrepDynkinLabel[irrep],
@@ -136,12 +151,17 @@ Begin["Private`"];
 		IrrepBasis[res, dynkin]
 	];
 
+	(* Expose the two different basis choices though an opetional argument
+	   The default ist the angular momentum basis *)
 	Options[LieAlgebraBasisMatrices]={BasisType->"AngularMomentum"};
 	LieAlgebraBasisMatrices[irrep_Irrep, OptionsPattern[]]:=Switch[OptionValue[BasisType],
 		"AngularMomentum", IrrepAngMomBasisMatrices[irrep],
 		"LoweringRaising", IrrepRLBasisMatrices[irrep]
 	];
 
+	(* Addional choice of basis for su(3): GellMann basis rearranges the matrices s.t.
+		X[3] and X[8] are the Casimir operators. This basis reduces to the Gellman Matrices
+		for D(1,0) *)
 	Options[SU3BasisMatrices]={BasisType->"GellMann"};
 	SU3BasisMatrices[p_, q_, OptionsPattern[]] := Module[{
 		coords,
@@ -156,6 +176,7 @@ Begin["Private`"];
 			X]
 	];
 	
+	(* Explicitly construct su(2) irrep *)
 	Options[SU2BasisMatrices]={BasisType->"AngularMomentum"};
 	SU2BasisMatrices[p_, OptionsPattern[]]:=LieAlgebraBasisMatrices[Irrep[p], BasisType->OptionValue[BasisType]]
 End[];

@@ -47,3 +47,4 @@ The package is an implementation of the algorithm outlined in [1].
 - [x] Python bindings
 - [x] Mathematica bindings
 - [ ] Decompose tensor products into irreducible representations
+- [ ] Clebsch-Gordon coefficients
