@@ -48,11 +48,13 @@ _array_increment_by_limits(gt_int_t *arr,
                            size_t length,
                            gt_int_t *lower_lim,
                            gt_int_t *upper_lim) {
-    for (size_t i = 0; i < length; ++i) {
+    size_t i, j;
+    
+    for (i = 0; i < length; ++i) {
         if (arr[i] < upper_lim[i]) {
             ++arr[i];
             if (i > 0) {
-                for (size_t j = 0; j < i; ++j)
+                for (j = 0; j < i; ++j)
                     arr[j] = arr[i];
             }
             return 0;
@@ -66,8 +68,9 @@ void
 gt_min_int_pattern(gt_int_t *pattern, gt_int_t *toprow, size_t length) {
     size_t n = (length * (length + 1)) >> 1,
            offset = 0;
-
-    for (size_t i = 0, j = 0; i < n; i++) {
+    size_t i, j;
+    
+    for (i = 0, j = 0; i < n; i++) {
         pattern[i] = toprow[offset + j];
 
         if (j == length - offset - 1) {
@@ -83,9 +86,10 @@ void
 gt_min_int_pattern_transposed(gt_int_t *pattern,
                               gt_int_t *toprow,
                               size_t length) {
-    size_t offset = 0;
-    for (size_t i = 0; i < length; ++i) {
-        for (size_t j = 0; j < length - i; ++j) {
+    size_t offset = 0, i, j;
+    
+    for (i = 0; i < length; ++i) {
+        for (j = 0; j < length - i; ++j) {
             pattern[offset + j] = toprow[length - i - 1];
         }
         offset += length - i;
@@ -105,15 +109,16 @@ gt_allocate_min_int_pattern(gt_int_t *toprow, size_t length) {
 void
 gt_multi_transpose(gt_int_t *patterns, size_t num_patterns, size_t length) {
     size_t m = length - 1, idx_a, idx_b,
-           n = (length * (length + 1)) >> 1;
+           n = (length * (length + 1)) >> 1,
+           i, j, k;
     int tmp;
 
-    for (size_t i = 0; i < (length >> 1); ++i) {
-        for (size_t j = i; j < length - i; ++j) {
+    for (i = 0; i < (length >> 1); ++i) {
+        for (j = i; j < length - i; ++j) {
             idx_a = GT_RL_IDX(i, j, length);
             idx_b = GT_RL_IDX(m-j, m-i, length);
 
-            for (size_t k = 0; k < num_patterns * n; k += n) {
+            for (k = 0; k < num_patterns * n; k += n) {
                 tmp = patterns[k + idx_a];
                 patterns[k + idx_a] = patterns[k + idx_b];
                 patterns[k + idx_b] = tmp;
@@ -140,9 +145,9 @@ _gt_increment_transposed(gt_int_t *pattern_tr,
                          gt_int_t *min_pattern_tr,
                          size_t length) {
     uint8_t carry = 1;
-    size_t m = length - 1, offset;
+    size_t m = length - 1, offset, i;
 
-    for (size_t i = 0; i < m; ++i) {
+    for (i = 0; i < m; ++i) {
         offset = GT_ROW_OFFSET(i, length);
         carry = _array_increment_by_limits(
             pattern_tr + offset,
@@ -178,17 +183,18 @@ _abs_gcd(size_t x, size_t y) {
 size_t
 gt_num_of_patterns(gt_int_t *toprow, size_t length) {
     gt_int_t *m = malloc(sizeof(gt_int_t) * (length - 1));
+    size_t i, j, k;
 
-    for (size_t i = 0; i < length - 1; ++i)
+    for (i = 0; i < length - 1; ++i)
         m[i] = toprow[i] - toprow[i + 1];
 
     size_t num = 1, denom = 1,
            red_factor, factor;
-    for (size_t i = 1; i <= length - 1; ++i) {
-        for (size_t j = 0; j < length - i; ++j) {
+    for (i = 1; i <= length - 1; ++i) {
+        for (j = 0; j < length - i; ++j) {
             factor = 0;
 
-            for (size_t k = 0; k < i; ++k)
+            for (k = 0; k < i; ++k)
                 factor += m[j + k];
             num *= factor + i;
             denom *= i;
@@ -208,12 +214,13 @@ gt_generate_all_transposed(gt_int_t **patterns,
                            gt_int_t *toprow,
                            size_t length) {
     size_t n_patterns = gt_num_of_patterns(toprow, length),
-           n_entries = (length * (length + 1)) >> 1;
+           n_entries = (length * (length + 1)) >> 1,
+           i;
     gt_int_t *_patterns = malloc(sizeof(gt_int_t) * n_entries * n_patterns);
 
     gt_min_int_pattern_transposed(_patterns, toprow, length);
 
-    for (size_t i = 1; i < n_patterns; ++i) {
+    for (i = 1; i < n_patterns; ++i) {
         memcpy(_patterns + i * n_entries,
                _patterns + (i - 1) * n_entries,
                n_entries * sizeof(gt_int_t));
@@ -246,12 +253,13 @@ _insert_pattern(struct gt_node *node,
     assert(length >= 2);
 
     gt_int_t *toprow = pattern;
-    size_t d_limit = length - 2;
+    size_t d_limit = length - 2, d, i;
+    int j;
 
-    for (size_t d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
+    for (d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
         if (node->children == NULL) {
             node->children = malloc(sizeof(struct gt_node) * (toprow[i] + 1));
-            for (int j = 0; j <= toprow[i]; ++j) {
+            for (j = 0; j <= toprow[i]; ++j) {
                 node->children[j].children = NULL;
                 node->children[j].index = -1;
             }
@@ -277,11 +285,11 @@ gt_locate_in_tree(struct gt_tree *tree, gt_int_t *pattern) {
     assert(length >= 2);
 
     gt_int_t *toprow = pattern;
-    size_t d_limit = length - 2;
+    size_t d_limit = length - 2, d, i;
 
     struct gt_node *node = &tree->root;
 
-    for (size_t d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
+    for (d = length, i = 0; d < (length * (length + 1)) >> 1; d++) {
         if (node->children == NULL
             || pattern[d] > pattern[i]
             || pattern[d] < toprow[length - 1])
@@ -309,15 +317,17 @@ gt_list_to_tree(struct gt_tree *tree,
     tree->num_patterns = num_patterns;
     tree->root.children = NULL;
 
-    size_t m = (length * (length + 1)) >> 1;
+    size_t m = (length * (length + 1)) >> 1, i;
 
-    for (size_t i = 0; i < num_patterns; i++) {
+    for (i = 0; i < num_patterns; i++) {
         _insert_pattern(&tree->root, patterns + i * m, i, length);
     }
 }
 
 void
 _free_node(gt_int_t *toprow, size_t d, size_t length, struct gt_node *node) {
+    gt_int_t i;
+
     if (length == 0 || node->children == NULL)
         return;
 
@@ -326,7 +336,7 @@ _free_node(gt_int_t *toprow, size_t d, size_t length, struct gt_node *node) {
         length--;
     }
 
-    for (gt_int_t i = 0; i <= toprow[d]; i++)
+    for (i = 0; i <= toprow[d]; i++)
         _free_node(toprow, d+1, length, node->children + i);
 
     free(node->children);

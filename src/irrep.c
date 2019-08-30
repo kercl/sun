@@ -31,9 +31,10 @@
 gt_int_t*
 gt_top_row_from_dynkin(gt_int_t *dynkin, size_t length) {
     gt_int_t *top_row = malloc(sizeof(gt_int_t) * (length + 1));
+    int i;
 
     top_row[length] = 0;
-    for (int i = length - 1; i >= 0; i--)
+    for (i = length - 1; i >= 0; i--)
         top_row[i] = top_row[i + 1] + dynkin[i];
 
     return top_row;
@@ -45,15 +46,16 @@ csa_generator_diag_from_gt(struct gt_tree *patterns,
                            mat_int_t *diagonal) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
-           num_patterns = patterns->num_patterns;
+           num_patterns = patterns->num_patterns,
+	   M, Mi, j;
     gt_int_t *pattern_array = patterns->array_representation;
 
     size_t n_entries = (length * (length + 1)) / 2,
            row_start = n_entries - (row_len * (row_len + 1)) / 2;
 
-    for (size_t M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
+    for (M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
         diagonal[Mi] = 0;
-        for (size_t j = 0; j <= row_len; j++) {
+        for (j = 0; j <= row_len; j++) {
             if (j < row_len) {
                 // sum over row l
                 diagonal[Mi] -=
@@ -80,7 +82,8 @@ lowering_operator_from_gt(struct gt_tree *patterns,
                           size_t **ptr_col) {
     size_t length = patterns->length,
            row_len = patterns->length - l,
-           num_patterns = patterns->num_patterns;
+           num_patterns = patterns->num_patterns,
+	   M, Mi, k, k_p;
     gt_int_t *pattern_array = patterns->array_representation;
 
     size_t n_entries = (length * (length + 1)) / 2,
@@ -94,8 +97,8 @@ lowering_operator_from_gt(struct gt_tree *patterns,
            *col = malloc(sizeof(size_t) * array_sizes);
 
     int M_lk, M_lkp;
-    for (size_t M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
-        for (size_t k = 0; k < row_len; k++) {
+    for (M = 0, Mi = 0; Mi < num_patterns; M+=n_entries, Mi++) {
+        for (k = 0; k < row_len; k++) {
             // if pattern has at lowering position already 0
             // as entry, the resulting pattern cannot exist
             if(pattern_array[M + row_start + k] == 0)
@@ -113,7 +116,7 @@ lowering_operator_from_gt(struct gt_tree *patterns,
 
             int numerator = 1, denominator = 1;
 
-            for (size_t k_p = 0; k_p < row_len + 1 && numerator != 0; k_p++) {
+            for (k_p = 0; k_p < row_len + 1 && numerator != 0; k_p++) {
                 M_lk = pattern_array[M + row_start + k];
 
                 if (k_p < row_len && k != k_p) {

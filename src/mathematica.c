@@ -47,13 +47,14 @@ DLLEXPORT void WolframLibrary_uninitialize(WolframLibraryData libData) {
 }
 
 void get_top_row_from_args(WolframLibraryData libData, MArgument *Args, gt_int_t **top_row, size_t *len) {
+  int i;
   MTensor arg = MArgument_getMTensor(Args[0]);
 
   *len = libData->MTensor_getFlattenedLength(arg);
   mint* data = libData->MTensor_getIntegerData(arg);
 
   *top_row = malloc(sizeof(gt_int_t) * (*len));
-  for(int i = 0; i < *len; ++i)
+  for(i = 0; i < *len; ++i)
     (*top_row)[i] = (gt_int_t)data[i];
 }
 
@@ -113,7 +114,7 @@ DLLEXPORT int ml_cartan_matrix(WolframLibraryData libData, mint Argc, MArgument 
   mint out_rank = 1;
   mint out_dims[] = {basis->num_patterns};
   mint* out_data;
-  int err;
+  int err, i;
 
   err = libData->MTensor_new( out_type, out_rank, out_dims, &out );
   out_data = libData->MTensor_getIntegerData(out);
@@ -121,7 +122,7 @@ DLLEXPORT int ml_cartan_matrix(WolframLibraryData libData, mint Argc, MArgument 
   mat_int_t *diagonal = malloc(sizeof(mat_int_t) * basis->num_patterns);
   csa_generator_diag_from_gt(basis, l, diagonal);
 
-  for(int i = 0; i < basis->num_patterns; i++)
+  for(i = 0; i < basis->num_patterns; i++)
     out_data[i] = diagonal[i];
 
   free(diagonal);
@@ -149,12 +150,12 @@ DLLEXPORT int ml_root_lowering(WolframLibraryData libData, mint Argc, MArgument 
   mint out_rank = 2;
   mint out_dims[] = {4, n_entries};
   mint* out_data;
-  int err;
+  int err, i;
 
   err = libData->MTensor_new( out_type, out_rank, out_dims, &out );
   out_data = libData->MTensor_getIntegerData(out);
 
-  for(int i = 0; i < n_entries; i++) {
+  for(i = 0; i < n_entries; i++) {
     out_data[i] = numerators[i];
     out_data[n_entries + i] = denominators[i];
     out_data[2 * n_entries + i] = rows[i] + 1;
