@@ -30,7 +30,7 @@ cdef class SU2(Irrep):
   """
 
   def __init__(self, j):
-    super().__init__(dykin=[<int>j])
+    super().__init__(dykin=1)
 
   def __getitem__(self, i):
     if i == 3:

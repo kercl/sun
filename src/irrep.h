@@ -26,7 +26,7 @@
 
 #include "int_gt.h"
 
-typedef short mat_int_t;
+typedef int mat_int_t;
 
 /* Convert dynkin label to GT top row
  */

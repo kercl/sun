@@ -9,4 +9,4 @@ build
 deprecated
 *.so
 *.sh
-/sun
+sun.egg-info
