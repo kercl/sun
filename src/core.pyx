@@ -1,7 +1,6 @@
 cimport cython
 from cython.view cimport array as cvarray
 from libc.stdlib cimport malloc, free
-from itertools import combinations
 
 import numpy as np
 
