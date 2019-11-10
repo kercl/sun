@@ -1841,7 +1841,7 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_2_cartan(struct __pyx_obj_3sun_7n
  * 
  *   def _lowering_root(self, p):             # <<<<<<<<<<<<<<
  *     r, c, n, d = self._build_lowering_operator_entries(p).T
- *     return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+ *     return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))
  */
 
 /* Python wrapper */
@@ -1877,7 +1877,7 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_4_lowering_root(struct __pyx_obj_
  * 
  *   def _lowering_root(self, p):
  *     r, c, n, d = self._build_lowering_operator_entries(p).T             # <<<<<<<<<<<<<<
- *     return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+ *     return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))
  * 
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_build_lowering_operator_entries); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 20, __pyx_L1_error)
@@ -1971,38 +1971,59 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_4_lowering_root(struct __pyx_obj_
   /* "src/numeric.pyx":21
  *   def _lowering_root(self, p):
  *     r, c, n, d = self._build_lowering_operator_entries(p).T
- *     return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))             # <<<<<<<<<<<<<<
+ *     return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))             # <<<<<<<<<<<<<<
  * 
  *   def _raising(self, p, q):
  */
   __Pyx_XDECREF(__pyx_r);
   __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_coo_matrix); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyNumber_Divide(__pyx_v_n, __pyx_v_d); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_INCREF(__pyx_v_r);
-  __Pyx_GIVEREF(__pyx_v_r);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_v_r);
-  __Pyx_INCREF(__pyx_v_c);
-  __Pyx_GIVEREF(__pyx_v_c);
-  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_v_c);
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_sqrt); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyNumber_Divide(__pyx_v_n, __pyx_v_d); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
+  __pyx_t_1 = NULL;
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_3);
+    if (likely(__pyx_t_1)) {
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_1);
+      __Pyx_INCREF(function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
+    }
+  }
+  __pyx_t_5 = (__pyx_t_1) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_1, __pyx_t_4) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4);
+  __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_5);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
-  __pyx_t_5 = 0;
-  __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_INCREF(__pyx_v_r);
+  __Pyx_GIVEREF(__pyx_v_r);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_v_r);
+  __Pyx_INCREF(__pyx_v_c);
+  __Pyx_GIVEREF(__pyx_v_c);
+  PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_v_c);
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
+  __Pyx_GIVEREF(__pyx_t_5);
+  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_3);
-  PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_4, 1, __pyx_t_3);
+  __pyx_t_5 = 0;
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_4);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
+  __pyx_t_4 = 0;
+  __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_dim); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_dim); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
@@ -2015,13 +2036,13 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_4_lowering_root(struct __pyx_obj_
   PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_t_1);
   __pyx_t_5 = 0;
   __pyx_t_1 = 0;
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_shape, __pyx_t_6) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_shape, __pyx_t_6) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 21, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_r = __pyx_t_6;
   __pyx_t_6 = 0;
   goto __pyx_L0;
@@ -2031,7 +2052,7 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_4_lowering_root(struct __pyx_obj_
  * 
  *   def _lowering_root(self, p):             # <<<<<<<<<<<<<<
  *     r, c, n, d = self._build_lowering_operator_entries(p).T
- *     return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+ *     return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))
  */
 
   /* function exit code */
@@ -2055,7 +2076,7 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_4_lowering_root(struct __pyx_obj_
 }
 
 /* "src/numeric.pyx":23
- *     return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+ *     return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))
  * 
  *   def _raising(self, p, q):             # <<<<<<<<<<<<<<
  *     return self._lowering(p, q).H
@@ -2196,7 +2217,7 @@ static PyObject *__pyx_pf_3sun_7numeric_5Irrep_6_raising(struct __pyx_obj_3sun_7
   goto __pyx_L0;
 
   /* "src/numeric.pyx":23
- *     return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+ *     return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))
  * 
  *   def _raising(self, p, q):             # <<<<<<<<<<<<<<
  *     return self._lowering(p, q).H

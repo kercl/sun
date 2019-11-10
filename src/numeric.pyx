@@ -18,7 +18,7 @@ cdef class Irrep(IrrepBase):
 
   def _lowering_root(self, p):
     r, c, n, d = self._build_lowering_operator_entries(p).T
-    return coo_matrix((n/d, (r, c)), shape=(self.dim, self.dim))
+    return coo_matrix((np.sqrt(n/d), (r, c)), shape=(self.dim, self.dim))
 
   def _raising(self, p, q):
     return self._lowering(p, q).H
