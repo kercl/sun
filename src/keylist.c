@@ -34,8 +34,8 @@ struct key_list_node* kl_push(struct key_list_node *list, int key, void *data) {
 }
 
 int kl_find(struct key_list_node *list, int key, void **data) {
-    while(list) {
-        if(list->key == key) {
+    while (list) {
+        if (list->key == key) {
             *data = list->data;
             return KL_OK;
         }
@@ -45,13 +45,14 @@ int kl_find(struct key_list_node *list, int key, void **data) {
     return KL_MISSING;
 }
 
-struct key_list_node* kl_unlink(struct key_list_node *list, int key, void **data) {
-    if(list == NULL) {
+struct key_list_node* kl_unlink(struct key_list_node *list,
+                                int key, void **data) {
+    if (list == NULL) {
         *data = NULL;
         return NULL;
     }
 
-    if(list->key == key) {
+    if (list->key == key) {
         *data = list->data;
         struct key_list_node *next = list->next;
         free(list);
@@ -60,8 +61,8 @@ struct key_list_node* kl_unlink(struct key_list_node *list, int key, void **data
 
     struct key_list_node *prev = list, *head = list;
     list = list->next;
-    while(list != NULL) {
-        if(list->key == key) {
+    while (list != NULL) {
+        if (list->key == key) {
             prev->next = list->next;
             *data = list->data;
             free(list);

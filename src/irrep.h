@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef SUN_CORE_IRREP_H_
-#define SUN_CORE_IRREP_H_
+#ifndef SRC_IRREP_H_
+#define SRC_IRREP_H_
 
 #include <stdint.h>
 
@@ -73,4 +73,4 @@ lowering_operator_from_gt(struct gt_tree *patterns,
 size_t
 dimension_from_dynkin(gt_int_t *dynkin, size_t length);
 
-#endif  // SUN_CORE_IRREP_H_
+#endif  // SRC_IRREP_H_

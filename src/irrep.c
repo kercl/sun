@@ -98,7 +98,7 @@ lowering_operator_from_gt(struct gt_tree *patterns,
         for (size_t k = 0; k < row_len; k++) {
             // if pattern has at lowering position already 0
             // as entry, the resulting pattern cannot exist
-            if(pattern_array[M + row_start + k] == 0)
+            if (pattern_array[M + row_start + k] == 0)
                 continue;
 
             // decrement pattern M -> M - M^{k,l}
@@ -136,17 +136,20 @@ lowering_operator_from_gt(struct gt_tree *patterns,
             col[entry_counter] = Mj;
 
             entry_counter++;
-            if(entry_counter == array_sizes) {
+            if (entry_counter == array_sizes) {
                 array_sizes += num_patterns;
-                numerators = realloc(numerators, sizeof(mat_int_t) * array_sizes);
-                denominators = realloc(denominators, sizeof(mat_int_t) * array_sizes);
+                numerators = realloc(numerators,
+                                     sizeof(mat_int_t) * array_sizes);
+                denominators = realloc(denominators,
+                                       sizeof(mat_int_t) * array_sizes);
                 row = realloc(row, sizeof(size_t) * array_sizes);
                 col = realloc(col, sizeof(size_t) * array_sizes);
             }
         }
     }
     *ptr_numerators = realloc(numerators, sizeof(mat_int_t) * entry_counter);
-    *ptr_denominators = realloc(denominators, sizeof(mat_int_t) * entry_counter);
+    *ptr_denominators = realloc(denominators,
+                                sizeof(mat_int_t) * entry_counter);
     *ptr_row = realloc(row, sizeof(size_t) * entry_counter);
     *ptr_col = realloc(col, sizeof(size_t) * entry_counter);
 

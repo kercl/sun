@@ -19,14 +19,14 @@
  * SOFTWARE.
  */
 
-#ifndef SUN_CORE_INT_GT_H_
-#define SUN_CORE_INT_GT_H_
+#ifndef SRC_INT_GT_H_
+#define SRC_INT_GT_H_
 
 #include <stddef.h>
 #include <stdint.h>
 #include <limits.h>
 
-typedef short gt_int_t;
+typedef int16_t gt_int_t;
 
 #define GT_INT_MAX 0x7FFF
 #define GT_INT_MIN -0x7FFF
@@ -177,4 +177,4 @@ gt_free_tree(struct gt_tree *tree, int free_array);
 size_t
 gt_locate_in_tree(struct gt_tree *tree, gt_int_t *pattern);
 
-#endif  // SUN_CORE_INT_GT_H_
+#endif  // SRC_INT_GT_H_

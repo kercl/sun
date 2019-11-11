@@ -19,8 +19,8 @@
  * SOFTWARE.
  */
 
-#ifndef KEY_LIST_H_
-#define KEY_LIST_H_
+#ifndef SRC_KEYLIST_H_
+#define SRC_KEYLIST_H_
 
 #define KL_OK 1
 #define KL_MISSING 0
@@ -33,6 +33,7 @@ struct key_list_node {
 
 struct key_list_node* kl_push(struct key_list_node *list, int key, void *data);
 int kl_find(struct key_list_node *list, int key, void **data);
-struct key_list_node* kl_unlink(struct key_list_node *list, int key, void **data);
+struct key_list_node* kl_unlink(struct key_list_node *list,
+                                int key, void **data);
 
-#endif
+#endif  // SRC_KEYLIST_H_
