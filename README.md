@@ -1,6 +1,6 @@
-# $`\mathfrak{su}(n)`$ Toolkit
+# 𝔰𝔲(n) Toolkit
 
-This software package aims to provide several tools for working with representations of the Lie-algebras $`\mathfrak{su}(n)`$.
+This software package aims to provide several tools for working with representations of the Lie-algebras 𝔰𝔲(n).
 
 The core library is written in C for efficiency and has bindings for numpy, sympy and Mathematica.
 
