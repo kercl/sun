@@ -141,7 +141,7 @@ Begin["Private`"];
 			Transpose[{Range@dim,Range@dim}]->1/2 SUNCartan[ManagedLibraryExpressionID@basis, l],
 			{dim,dim}],
 			{l,Length@topRow-1}];
-		lowering=GenerateAllLowering[loweringRoot, topRow, ParallelTable];
+		lowering=GenerateAllLowering[loweringRoot, topRow, Table];
 		res = Join[Flatten[Transpose@{lowering,ConjugateTranspose/@lowering}, 1], cartan];
 		IrrepBasis[res, IrrepDynkinLabel[irrep]]
 	];
@@ -172,19 +172,6 @@ Begin["Private`"];
 				{k, Length[Y]}
 			],
 			dynkin]
-	];
-
-	(* Based on the RL basis, compute (Subscript[Y, k]+Subscript[Y, k+1])/2 and (Subscript[Y, k]-Subscript[Y, k+1])/(2i) *)
-	DEPRECATEDIrrepAngMomBasisMatrices[irrep_Irrep] := Module[{
-		Y=IrrepRLBasisMatrices[irrep],
-		dynkin=IrrepDynkinLabel[irrep],
-		res
-	},
-		res = Join[Flatten[Table[{
-			(Y[i]+Y[i+1])/2, -(Y[i]-Y[i+1])/(2I)
-		},
-		{i, 1, Length[Y]-Length[dynkin], 2}],1], Y[Length[Y]-Length[dynkin]+1;;]];
-		IrrepBasis[res, dynkin]
 	];
 
 	(* Expose the two different basis choices though an opetional argument
