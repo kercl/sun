@@ -44,6 +44,9 @@ cdef class SU2(Irrep):
             2 * irrep.x(2)]
 
 cdef class SU3(Irrep):
+  """
+  SU(3) representations
+  """
   cdef object _x_8
 
   def __init__(self, n, m):
@@ -82,3 +85,71 @@ cdef class SU3(Irrep):
       return self._x_8
     
     raise KeyError("Index out of bounds.")
+
+  @staticmethod
+  def gell_mann():
+    irrep = SU3(1, 0)
+    return [2 * irrep[i] for i in range(1, 8+1)]
+
+cdef class LieAlgebra(Irrep):
+  """
+  SU(3) representations
+  """
+  cdef object _onb_csa
+
+  def __init__(self, *args):
+    super().__init__(dynkin=args)
+
+    self._onb_csa = [self.cartan(i) for i in range(self.dim_csa)]
+    trx2 = [None] * self.dim_csa
+
+    # use fact that in the generated bases
+    # CSA is given in diagonal form
+    # tr(X_j.X_j) = sum((X_j)_kk * (X_j)_kk)
+
+    trx2[0] = (self._onb_csa[0].diagonal()**2).sum()
+    for i in range(1, self.dim_csa):
+      for j in range(i):
+        trxj2 = trx2[j]
+        trxixj = (self._onb_csa[i].diagonal()*
+                  self._onb_csa[j].diagonal()).sum()
+        
+        self._onb_csa[i] -= (trxixj / trxj2) * self._onb_csa[j]
+
+      trx2[i] = (self._onb_csa[i].diagonal()**2).sum()
+
+    for i in range(self.dim_csa):
+      self._onb_csa[i] *= np.sqrt(trx2[0] / trx2[i])
+
+  @staticmethod
+  def _int_sqrt(n):
+    lbound = 0
+    ubound = n
+    
+    while lbound != ubound:
+      mid = (lbound + ubound) // 2
+      mid2 = mid**2
+      
+      if mid2 == n:
+        return mid, 0
+      elif mid2 < n:
+        lbound = mid + 1
+      else:
+        ubound = mid
+
+    m = lbound**2
+    if m == n:
+      return lbound, 0
+    return lbound - 1, n - m + 2*lbound - 1
+
+  def __getitem__(self, i):
+    if i < 1 or i > self.dim_lie_algebra:
+      raise KeyError("Index out of bounds.")
+
+    j, d = LieAlgebra._int_sqrt(i + 1)
+
+    # i + 1 = j^2 => element is in CSA
+    if d == 0:
+      return self._onb_csa[j - 2]
+
+    return self.x(i - j)

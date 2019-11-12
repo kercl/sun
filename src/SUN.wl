@@ -24,9 +24,10 @@ BeginPackage["SUN`"];
 		"Construct \[GothicS]\[GothicU](2) Irrep basis";
 	
 	IrrepBuildLoweringRootOperators::usage =
-		"test";
-	
+		"TODO";
+
 Begin["Private`"];
+
 	sunLibCore = FindLibrary["sun_core"];
 	
 	(* Icon used in the summary boxes *)
@@ -145,8 +146,36 @@ Begin["Private`"];
 		IrrepBasis[res, IrrepDynkinLabel[irrep]]
 	];
 
-	(* Based on the RL basis, compute (Subscript[Y, k]+Subscript[Y, k+1])/2 and (Subscript[Y, k]-Subscript[Y, k+1])/(2i) *)
+	(* Based on the RL basis, compute (Y_{k}+Y_{k+1})/2 and (Y_{k}-Y_{k+1})/(2i) *)
 	IrrepAngMomBasisMatrices[irrep_Irrep] := Module[{
+		Y=IrrepRLBasisMatrices[irrep],
+		dynkin=IrrepDynkinLabel[irrep],
+		res, norm, csa
+	},
+		res = Flatten[
+				Table[
+					{(Y[i]+Y[i+1])/2, -(Y[i]-Y[i+1])/(2I)},
+					{i, 1, Length[Y]-Length[dynkin], 2}]
+				,1];
+		csa = Y[Length[Y]-Length[dynkin]+1;;];
+		norm = Total@Power[Diagonal@First@csa, 2];
+
+		csa = Simplify@(
+			SparseArray[Transpose@{Range@Length[#], Range@Length[#]} -> #]& /@
+			Orthogonalize[Diagonal /@ csa]
+		);
+
+		csa = Sqrt[norm/Tr[#.#]]# & /@ csa;
+
+		IrrepBasis[Table[
+				If[#2 == 0, csa[[#1-1]], res[[k-#1+1]]] & @@ {#, k+1-#^2} &@ Floor@Sqrt[k+1],
+				{k, Length[Y]}
+			],
+			dynkin]
+	];
+
+	(* Based on the RL basis, compute (Subscript[Y, k]+Subscript[Y, k+1])/2 and (Subscript[Y, k]-Subscript[Y, k+1])/(2i) *)
+	DEPRECATEDIrrepAngMomBasisMatrices[irrep_Irrep] := Module[{
 		Y=IrrepRLBasisMatrices[irrep],
 		dynkin=IrrepDynkinLabel[irrep],
 		res
@@ -166,22 +195,9 @@ Begin["Private`"];
 		"LoweringRaising", IrrepRLBasisMatrices[irrep]
 	];
 
-	(* Addional choice of basis for su(3): GellMann basis rearranges the matrices s.t.
-		X[3] and X[8] are the Casimir operators. This basis reduces to the Gellman Matrices
-		for D(1,0) *)
-	Options[SU3BasisMatrices]={BasisType->"GellMann"};
-	SU3BasisMatrices[p_, q_, OptionsPattern[]] := Module[{
-		coords,
-		X=If[OptionValue[BasisType]=="GellMann",
-			 LieAlgebraBasisMatrices@Irrep[p, q],
-			 LieAlgebraBasisMatrices[Irrep[p, q], BasisType->OptionValue[BasisType]]]
-	},
-		If[OptionValue[BasisType]=="GellMann",
-			X = X[{1, 2, 7, 3, 4, 5, 6, 8}];
-			X[[8]]=(Sqrt[Tr[X[[3]].X[[3]]]/Tr[#.#]]#)&@(X[[8]]-Tr[X[[3]].X[[8]]]/Tr[X[[8]].X[[8]]] X[[3]]);
-			IrrepBasis[X, {p, q}],
-			X]
-	];
+	(* Explicitly construct su(3) irrep *)
+	Options[SU3BasisMatrices]={BasisType->"AngularMomentum"};
+	SU3BasisMatrices[p_, q_, OptionsPattern[]]:=LieAlgebraBasisMatrices[Irrep[p, q], BasisType->OptionValue[BasisType]]
 	
 	(* Explicitly construct su(2) irrep *)
 	Options[SU2BasisMatrices]={BasisType->"AngularMomentum"};
